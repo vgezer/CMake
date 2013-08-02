@@ -80,6 +80,7 @@ All Modules
    /module/FindBullet
    /module/FindBZip2
    /module/FindCABLE
+   /module/FindCXXFeatures
    /module/FindCoin3D
    /module/FindCUDA
    /module/FindCups
