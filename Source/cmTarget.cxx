@@ -1388,7 +1388,7 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-static bool whiteListedInterfaceProperty(const char *prop)
+static bool whiteListedInterfaceProperty(const std::string& prop)
 {
   if(cmHasLiteralPrefix(prop, "INTERFACE_"))
     {
@@ -1408,8 +1408,8 @@ static bool whiteListedInterfaceProperty(const char *prop)
 
   if (std::binary_search(cmArrayBegin(builtIns),
                          cmArrayEnd(builtIns),
-                         prop,
-                         cmStrCmp(prop)))
+                         prop.c_str(),
+                         cmStrCmp(prop.c_str())))
     {
     return true;
     }
@@ -1423,12 +1423,8 @@ static bool whiteListedInterfaceProperty(const char *prop)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::SetProperty(const char* prop, const char* value)
+void cmTarget::SetProperty(const std::string& prop, const char* value)
 {
-  if (!prop)
-    {
-    return;
-    }
   if (this->GetType() == INTERFACE_LIBRARY
       && !whiteListedInterfaceProperty(prop))
     {
@@ -1439,14 +1435,14 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     return;
     }
 
-  if (strcmp(prop, "NAME") == 0)
+  if (prop == "NAME")
     {
     cmOStringStream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
-  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+  if(prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
@@ -1457,7 +1453,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
-  if(strcmp(prop,"COMPILE_OPTIONS") == 0)
+  if(prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
@@ -1468,7 +1464,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
-  if(strcmp(prop,"COMPILE_DEFINITIONS") == 0)
+  if(prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
@@ -1479,7 +1475,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
                           new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
-  if(strcmp(prop,"EXPORT_NAME") == 0 && this->IsImported())
+  if(prop == "EXPORT_NAME" && this->IsImported())
     {
     cmOStringStream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
@@ -1487,7 +1483,7 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
-  if (strcmp(prop, "LINK_LIBRARIES") == 0)
+  if (prop == "LINK_LIBRARIES")
     {
     this->Internal->LinkImplementationPropertyEntries.clear();
     cmListFileBacktrace lfbt;
@@ -1501,13 +1497,9 @@ void cmTarget::SetProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AppendProperty(const char* prop, const char* value,
+void cmTarget::AppendProperty(const std::string& prop, const char* value,
                               bool asString)
 {
-  if (!prop)
-    {
-    return;
-    }
   if (this->GetType() == INTERFACE_LIBRARY
       && !whiteListedInterfaceProperty(prop))
     {
@@ -1517,14 +1509,14 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
-  if (strcmp(prop, "NAME") == 0)
+  if (prop == "NAME")
     {
     cmOStringStream e;
     e << "NAME property is read-only\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
-  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+  if(prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
@@ -1533,7 +1525,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     return;
     }
-  if(strcmp(prop,"COMPILE_OPTIONS") == 0)
+  if(prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
@@ -1542,7 +1534,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     return;
     }
-  if(strcmp(prop,"COMPILE_DEFINITIONS") == 0)
+  if(prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
@@ -1551,7 +1543,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     return;
     }
-  if(strcmp(prop,"EXPORT_NAME") == 0 && this->IsImported())
+  if(prop == "EXPORT_NAME" && this->IsImported())
     {
     cmOStringStream e;
     e << "EXPORT_NAME property can't be set on imported targets (\""
@@ -1559,7 +1551,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
-  if (strcmp(prop, "LINK_LIBRARIES") == 0)
+  if (prop == "LINK_LIBRARIES")
     {
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
@@ -2310,7 +2302,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
+void cmTarget::MaybeInvalidatePropertyCache(const std::string& prop)
 {
   // Wipe out maps caching information affected by this property.
   if(this->IsImported() && cmHasLiteralPrefix(prop, "IMPORTED"))
@@ -2325,8 +2317,8 @@ void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
 
 //----------------------------------------------------------------------------
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(
-  const char* prop, const char* value, cmMakefile* context, bool imported
-  )
+  const std::string& prop, const char* value, cmMakefile* context,
+  bool imported)
 {
   // Look for link-type keywords in the value.
   static cmsys::RegularExpression
@@ -2390,7 +2382,8 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::CheckProperty(const char* prop, cmMakefile* context) const
+void cmTarget::CheckProperty(const std::string& prop,
+                             cmMakefile* context) const
 {
   // Certain properties need checking.
   if(cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES"))
@@ -2625,7 +2618,7 @@ const char* cmTarget::GetFeature(const char* feature, const char* config) const
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const char* prop) const
+const char *cmTarget::GetProperty(const std::string& prop) const
 {
   return this->GetProperty(prop, cmProperty::TARGET);
 }
@@ -2668,14 +2661,9 @@ bool cmTarget::HandleLocationPropertyPolicy() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const char* prop,
+const char *cmTarget::GetProperty(const std::string& prop,
                                   cmProperty::ScopeType scope) const
 {
-  if(!prop)
-    {
-    return 0;
-    }
-
   if (this->GetType() == INTERFACE_LIBRARY
       && !whiteListedInterfaceProperty(prop))
     {
@@ -2686,7 +2674,7 @@ const char *cmTarget::GetProperty(const char* prop,
     return 0;
     }
 
-  if (strcmp(prop, "NAME") == 0)
+  if (prop == "NAME")
     {
     return this->GetName();
     }
@@ -2699,7 +2687,7 @@ const char *cmTarget::GetProperty(const char* prop,
      this->GetType() == cmTarget::MODULE_LIBRARY ||
      this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
-    if(strcmp(prop,"LOCATION") == 0)
+    if(prop == "LOCATION")
       {
       if (!this->HandleLocationPropertyPolicy())
         {
@@ -2726,13 +2714,13 @@ const char *cmTarget::GetProperty(const char* prop,
         {
         return 0;
         }
-      std::string configName = prop+9;
+      const char* configName = prop.c_str() + 9;
       this->Properties.SetProperty(prop,
-                                   this->GetLocation(configName.c_str()),
+                                   this->GetLocation(configName),
                                    cmProperty::TARGET);
       }
     }
-  if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
+  if(prop == "INCLUDE_DIRECTORIES")
     {
     static std::string output;
     output = "";
@@ -2750,7 +2738,7 @@ const char *cmTarget::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  if(strcmp(prop,"COMPILE_OPTIONS") == 0)
+  if(prop == "COMPILE_OPTIONS")
     {
     static std::string output;
     output = "";
@@ -2768,7 +2756,7 @@ const char *cmTarget::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  if(strcmp(prop,"COMPILE_DEFINITIONS") == 0)
+  if(prop == "COMPILE_DEFINITIONS")
     {
     static std::string output;
     output = "";
@@ -2786,7 +2774,7 @@ const char *cmTarget::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  if(strcmp(prop,"LINK_LIBRARIES") == 0)
+  if(prop == "LINK_LIBRARIES")
     {
     static std::string output;
     output = "";
@@ -2803,12 +2791,12 @@ const char *cmTarget::GetProperty(const char* prop,
     return output.c_str();
     }
 
-  if (strcmp(prop,"IMPORTED") == 0)
+  if (prop == "IMPORTED")
     {
     return this->IsImported()?"TRUE":"FALSE";
     }
 
-  if(!strcmp(prop,"SOURCES"))
+  if(prop == "SOURCES")
     {
     cmOStringStream ss;
     const char* sep = "";
@@ -2837,7 +2825,7 @@ const char *cmTarget::GetProperty(const char* prop,
     }
 
   // the type property returns what type the target is
-  if (!strcmp(prop,"TYPE"))
+  if (prop == "TYPE")
     {
     return cmTarget::GetTargetTypeName(this->GetType());
     }
@@ -2852,7 +2840,7 @@ const char *cmTarget::GetProperty(const char* prop,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::GetPropertyAsBool(const char* prop) const
+bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
@@ -3807,7 +3795,7 @@ bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::SetPropertyDefault(const char* property,
+void cmTarget::SetPropertyDefault(const std::string& property,
                                   const char* default_value)
 {
   // Compute the name of the variable holding the default value.
@@ -4745,7 +4733,7 @@ const char * cmTarget::GetLinkInterfaceDependentNumberMaxProperty(
 
 //----------------------------------------------------------------------------
 bool isLinkDependentProperty(cmTarget const* tgt, const std::string &p,
-                             const char *interfaceProperty,
+                             const std::string& interfaceProperty,
                              const char *config)
 {
   cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
@@ -5802,14 +5790,14 @@ std::string cmTarget::CheckCMP0004(std::string const& item) const
 
 template<typename PropertyType>
 PropertyType getLinkInterfaceDependentProperty(cmTarget const* tgt,
-                                               const std::string prop,
+                                               const std::string& prop,
                                                const char *config,
                                                CompatibleType,
                                                PropertyType *);
 
 template<>
 bool getLinkInterfaceDependentProperty(cmTarget const* tgt,
-                                       const std::string prop,
+                                       const std::string& prop,
                                        const char *config,
                                        CompatibleType, bool *)
 {
@@ -5818,7 +5806,7 @@ bool getLinkInterfaceDependentProperty(cmTarget const* tgt,
 
 template<>
 const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
-                                               const std::string prop,
+                                               const std::string& prop,
                                                const char *config,
                                                CompatibleType t,
                                                const char **)
@@ -5843,7 +5831,7 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
 template<typename PropertyType>
 void checkPropertyConsistency(cmTarget const* depender,
                               cmTarget const* dependee,
-                              const char *propName,
+                              const cmStdString& propName,
                               std::set<cmStdString> &emitted,
                               const char *config,
                               CompatibleType t,

@@ -3547,17 +3547,9 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   return res;
 }
 
-void cmMakefile::SetProperty(const char* prop, const char* value)
+void cmMakefile::SetProperty(const cmStdString& prop, const char* value)
 {
-  if (!prop)
-    {
-    return;
-    }
-
-  // handle special props
-  std::string propname = prop;
-
-  if ( propname == "LINK_DIRECTORIES" )
+  if ( prop == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
     if(value)
@@ -3567,7 +3559,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->SetLinkDirectories(varArgsExpanded);
     return;
     }
-  if (propname == "INCLUDE_DIRECTORIES")
+  if (prop == "INCLUDE_DIRECTORIES")
     {
     this->IncludeDirectoriesEntries.clear();
       if (!value)
@@ -3580,7 +3572,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_OPTIONS")
+  if (prop == "COMPILE_OPTIONS")
     {
     this->CompileOptionsEntries.clear();
       if (!value)
@@ -3592,7 +3584,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_DEFINITIONS")
+  if (prop == "COMPILE_DEFINITIONS")
     {
     this->CompileDefinitionsEntries.clear();
     if (!value)
@@ -3606,13 +3598,13 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     return;
     }
 
-  if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
+  if ( prop == "INCLUDE_REGULAR_EXPRESSION" )
     {
     this->SetIncludeRegularExpression(value);
     return;
     }
 
-  if ( propname == "ADDITIONAL_MAKE_CLEAN_FILES" )
+  if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
     {
     // This property is not inherrited
     if ( strcmp(this->GetCurrentDirectory(),
@@ -3625,18 +3617,11 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
 }
 
-void cmMakefile::AppendProperty(const char* prop, const char* value,
+void cmMakefile::AppendProperty(const std::string& prop,
+                                const char* value,
                                 bool asString)
 {
-  if (!prop)
-    {
-    return;
-    }
-
-  // handle special props
-  std::string propname = prop;
-
-  if (propname == "INCLUDE_DIRECTORIES")
+  if (prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
@@ -3644,7 +3629,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_OPTIONS")
+  if (prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
@@ -3652,7 +3637,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_DEFINITIONS")
+  if (prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
@@ -3660,7 +3645,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if ( propname == "LINK_DIRECTORIES" )
+  if ( prop == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
     cmSystemTools::ExpandListArgument(value, varArgsExpanded);
@@ -3675,32 +3660,28 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
   this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
 }
 
-const char *cmMakefile::GetPropertyOrDefinition(const char* prop) const
+const char *cmMakefile::GetPropertyOrDefinition(const std::string& prop) const
 {
   const char *ret = this->GetProperty(prop, cmProperty::DIRECTORY);
   if (!ret)
     {
-    ret = this->GetDefinition(prop);
+    ret = this->GetDefinition(prop.c_str());
     }
   return ret;
 }
 
-const char *cmMakefile::GetProperty(const char* prop) const
+const char *cmMakefile::GetProperty(const std::string& prop) const
 {
   return this->GetProperty(prop, cmProperty::DIRECTORY);
 }
 
-const char *cmMakefile::GetProperty(const char* prop,
+const char *cmMakefile::GetProperty(const std::string& prop,
                                     cmProperty::ScopeType scope) const
 {
-  if(!prop)
-    {
-    return 0;
-    }
   // watch for specific properties
   static std::string output;
   output = "";
-  if (!strcmp("PARENT_DIRECTORY",prop))
+  if (prop == "PARENT_DIRECTORY")
     {
     if(cmLocalGenerator* plg = this->LocalGenerator->GetParent())
       {
@@ -3708,12 +3689,12 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("INCLUDE_REGULAR_EXPRESSION",prop) )
+  else if (prop == "INCLUDE_REGULAR_EXPRESSION" )
     {
     output = this->GetIncludeRegularExpression();
     return output.c_str();
     }
-  else if (!strcmp("LISTFILE_STACK",prop))
+  else if (prop == "LISTFILE_STACK")
     {
     for (std::deque<cmStdString>::const_iterator
         i = this->ListFileStack.begin();
@@ -3727,10 +3708,10 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("VARIABLES",prop) || !strcmp("CACHE_VARIABLES",prop))
+  else if (prop == "VARIABLES" || prop == "CACHE_VARIABLES")
     {
     int cacheonly = 0;
-    if ( !strcmp("CACHE_VARIABLES",prop) )
+    if ( prop == "CACHE_VARIABLES" )
       {
       cacheonly = 1;
       }
@@ -3745,17 +3726,17 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("MACROS",prop))
+  else if (prop == "MACROS")
     {
     this->GetListOfMacros(output);
     return output.c_str();
     }
-  else if (!strcmp("DEFINITIONS",prop))
+  else if (prop == "DEFINITIONS")
     {
     output += this->DefineFlagsOrig;
     return output.c_str();
     }
-  else if (!strcmp("LINK_DIRECTORIES",prop))
+  else if (prop == "LINK_DIRECTORIES")
     {
     cmOStringStream str;
     for (std::vector<std::string>::const_iterator
@@ -3772,7 +3753,7 @@ const char *cmMakefile::GetProperty(const char* prop,
     output = str.str();
     return output.c_str();
     }
-  else if (!strcmp("INCLUDE_DIRECTORIES",prop))
+  else if (prop == "INCLUDE_DIRECTORIES")
     {
     std::string sep;
     for (std::vector<cmValueWithOrigin>::const_iterator
@@ -3786,7 +3767,7 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("COMPILE_OPTIONS",prop))
+  else if (prop == "COMPILE_OPTIONS")
     {
     std::string sep;
     for (std::vector<cmValueWithOrigin>::const_iterator
@@ -3800,7 +3781,7 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("COMPILE_DEFINITIONS",prop))
+  else if (prop == "COMPILE_DEFINITIONS")
     {
     std::string sep;
     for (std::vector<cmValueWithOrigin>::const_iterator
@@ -3831,7 +3812,7 @@ const char *cmMakefile::GetProperty(const char* prop,
   return retVal;
 }
 
-bool cmMakefile::GetPropertyAsBool(const char* prop) const
+bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
@@ -4013,9 +3994,9 @@ void cmMakefile::PopScope()
     }
 }
 
-void cmMakefile::RaiseScope(const char *var, const char *varDef)
+void cmMakefile::RaiseScope(const cmStdString& var, const char *varDef)
 {
-  if (!var || !strlen(var))
+  if (var.empty())
     {
     return;
     }
@@ -4024,10 +4005,10 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
   if(cmDefinitions* up = cur.GetParent())
     {
     // First localize the definition in the current scope.
-    cur.Get(var);
+    cur.Get(var.c_str());
 
     // Now update the definition in the parent scope.
-    up->Set(var, varDef);
+    up->Set(var.c_str(), varDef);
     }
   else if(cmLocalGenerator* plg = this->LocalGenerator->GetParent())
     {
@@ -4037,11 +4018,11 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
     cmMakefile* parent = plg->GetMakefile();
     if (varDef)
       {
-      parent->AddDefinition(var, varDef);
+      parent->AddDefinition(var.c_str(), varDef);
       }
     else
       {
-      parent->RemoveDefinition(var);
+      parent->RemoveDefinition(var.c_str());
       }
     }
   else
