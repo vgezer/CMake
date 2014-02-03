@@ -74,25 +74,25 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   // these are used to find files when the extension
   // is not given
   // The "c" extension MUST precede the "C" extension.
-  this->SourceFileExtensions.push_back( "c" );
-  this->SourceFileExtensions.push_back( "C" );
+  this->SourceFileExtensions.insert( "c" );
+  this->SourceFileExtensions.insert( "C" );
 
-  this->SourceFileExtensions.push_back( "c++" );
-  this->SourceFileExtensions.push_back( "cc" );
-  this->SourceFileExtensions.push_back( "cpp" );
-  this->SourceFileExtensions.push_back( "cxx" );
-  this->SourceFileExtensions.push_back( "m" );
-  this->SourceFileExtensions.push_back( "M" );
-  this->SourceFileExtensions.push_back( "mm" );
+  this->SourceFileExtensions.insert( "c++" );
+  this->SourceFileExtensions.insert( "cc" );
+  this->SourceFileExtensions.insert( "cpp" );
+  this->SourceFileExtensions.insert( "cxx" );
+  this->SourceFileExtensions.insert( "m" );
+  this->SourceFileExtensions.insert( "M" );
+  this->SourceFileExtensions.insert( "mm" );
 
-  this->HeaderFileExtensions.push_back( "h" );
-  this->HeaderFileExtensions.push_back( "hh" );
-  this->HeaderFileExtensions.push_back( "h++" );
-  this->HeaderFileExtensions.push_back( "hm" );
-  this->HeaderFileExtensions.push_back( "hpp" );
-  this->HeaderFileExtensions.push_back( "hxx" );
-  this->HeaderFileExtensions.push_back( "in" );
-  this->HeaderFileExtensions.push_back( "txx" );
+  this->HeaderFileExtensions.insert( "h" );
+  this->HeaderFileExtensions.insert( "hh" );
+  this->HeaderFileExtensions.insert( "h++" );
+  this->HeaderFileExtensions.insert( "hm" );
+  this->HeaderFileExtensions.insert( "hpp" );
+  this->HeaderFileExtensions.insert( "hxx" );
+  this->HeaderFileExtensions.insert( "in" );
+  this->HeaderFileExtensions.insert( "txx" );
 
   this->DefineFlags = " ";
   this->LocalGenerator = 0;

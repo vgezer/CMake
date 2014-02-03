@@ -91,11 +91,11 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
   cmGlobalGenerator* gg =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
   cmMakefile const* mf = this->Makefile;
-  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
-  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
+  const std::set<std::string>& srcExts = mf->GetSourceExtensions();
+  const std::set<std::string>& hdrExts = mf->GetHeaderExtensions();
   if(gg->GetLanguageFromExtension(ext.c_str()) ||
-     std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end() ||
-     std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
+     (srcExts.count(ext) > 0) ||
+     (hdrExts.count(ext) > 0))
     {
     // This is a known extension.  Use the given filename with extension.
     this->Name = cmSystemTools::GetFilenameName(name);
@@ -172,13 +172,13 @@ cmSourceFileLocation
   // disk.  One of these must match if loc refers to this source file.
   std::string ext = this->Name.substr(loc.Name.size()+1);
   cmMakefile const* mf = this->Makefile;
-  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
-  if(std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end())
+  const std::set<std::string>& srcExts = mf->GetSourceExtensions();
+  if(srcExts.count(ext) > 0)
     {
     return true;
     }
-  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
-  if(std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
+  const std::set<std::string>& hdrExts = mf->GetHeaderExtensions();
+  if(hdrExts.count(ext) > 0)
     {
     return true;
     }

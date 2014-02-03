@@ -576,9 +576,9 @@ public:
    * Return a list of extensions associated with source and header
    * files
    */
-  const std::vector<std::string>& GetSourceExtensions() const
+  const std::set<std::string>& GetSourceExtensions() const
     {return this->SourceFileExtensions;}
-  const std::vector<std::string>& GetHeaderExtensions() const
+  const std::set<std::string>& GetHeaderExtensions() const
     {return this->HeaderFileExtensions;}
   //@}
 
@@ -921,8 +921,8 @@ protected:
 
   std::string IncludeFileRegularExpression;
   std::string ComplainFileRegularExpression;
-  std::vector<std::string> SourceFileExtensions;
-  std::vector<std::string> HeaderFileExtensions;
+  std::set<std::string> SourceFileExtensions;
+  std::set<std::string> HeaderFileExtensions;
   std::string DefineFlags;
 
   std::vector<cmValueWithOrigin> IncludeDirectoriesEntries;

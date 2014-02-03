@@ -158,7 +158,7 @@ bool cmGlobalKdevelopGenerator
           files.insert(tmp);
 
           // check if there's a matching header around
-          for(std::vector<std::string>::const_iterator
+          for(std::set<std::string>::const_iterator
                 ext = makefile->GetHeaderExtensions().begin();
               ext !=  makefile->GetHeaderExtensions().end(); ++ext)
             {

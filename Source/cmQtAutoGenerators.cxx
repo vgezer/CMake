@@ -62,10 +62,10 @@ static bool requiresMocing(const std::string& text, std::string &macroName)
 static std::string findMatchingHeader(const std::string& absPath,
                                       const std::string& mocSubDir,
                                       const std::string& basename,
-                              const std::vector<std::string>& headerExtensions)
+                              const std::set<std::string>& headerExtensions)
 {
   std::string header;
-  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::set<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
@@ -1280,7 +1280,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   std::vector<std::string> sourceFiles;
   cmSystemTools::ExpandListArgument(this->Sources, sourceFiles);
 
-  const std::vector<std::string>& headerExtensions =
+  const std::set<std::string>& headerExtensions =
                                                makefile->GetHeaderExtensions();
 
   std::map<std::string, std::string> includedUis;
@@ -1435,7 +1435,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
 
 void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
-                              const std::vector<std::string>& headerExtensions,
+                              const std::set<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs,
                               std::map<std::string, std::string> &includedUis)
 {
@@ -1623,7 +1623,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
 
 
 void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
-                              const std::vector<std::string>& headerExtensions,
+                              const std::set<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs,
                               std::map<std::string, std::string>& includedUis)
 {
@@ -1802,7 +1802,7 @@ void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
 
 void
 cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
-                              const std::vector<std::string>& headerExtensions,
+                              const std::set<std::string>& headerExtensions,
                               std::set<std::string>& absHeaders)
 {
   // search for header files and private header files we may need to moc:
@@ -1811,7 +1811,7 @@ cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
 
-  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::set<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
@@ -1822,7 +1822,7 @@ cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
       break;
       }
     }
-  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::set<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
@@ -2092,7 +2092,7 @@ bool cmQtAutoGenerators::GenerateQrc()
   return true;
 }
 
-std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
+std::string cmQtAutoGenerators::Join(const std::set<std::string>& lst,
                               char separator)
 {
     if (lst.empty())
@@ -2101,7 +2101,7 @@ std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
       }
 
     std::string result;
-    for (std::vector<std::string>::const_iterator it = lst.begin();
+    for (std::set<std::string>::const_iterator it = lst.begin();
          it != lst.end();
          ++it)
       {

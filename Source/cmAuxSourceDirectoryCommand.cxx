@@ -62,9 +62,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
         std::string base = file.substr(0, dotpos);
         // Process only source files
         if( base.size() != 0
-            && std::find( this->Makefile->GetSourceExtensions().begin(),
-                          this->Makefile->GetSourceExtensions().end(), ext )
-                 != this->Makefile->GetSourceExtensions().end() )
+            && (this->Makefile->GetSourceExtensions().count(ext) > 0) )
           {
           std::string fullname = templateDirectory;
           fullname += "/";
