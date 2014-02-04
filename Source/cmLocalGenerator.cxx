@@ -1194,7 +1194,7 @@ cmLocalGenerator::ExpandRuleVariables(std::string& s,
 
 //----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetRuleLauncher(cmTarget* target,
-                                              const cmStdString& prop)
+                                              const std::string& prop)
 {
   if(target)
     {
@@ -1208,7 +1208,7 @@ const char* cmLocalGenerator::GetRuleLauncher(cmTarget* target,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
-                                          const cmStdString& prop)
+                                          const std::string& prop)
 {
   if(const char* val = this->GetRuleLauncher(target, prop))
     {
@@ -2312,7 +2312,7 @@ void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
-                                              const char* var,
+                                              const std::string& var,
                                               const char* config)
 {
   // Add the flags from the variable itself.
