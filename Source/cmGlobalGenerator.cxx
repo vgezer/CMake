@@ -722,7 +722,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
-                                            std::string lang,
+                                            std::string const& lang,
                                             const char* envVar) const
 {
   // Subclasses override this method if they do not support this advice.
@@ -744,7 +744,7 @@ void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
-                                                     std::string lang) const
+                                                std::string const& lang) const
 {
   std::string compilerIdVar = "CMAKE_" + lang + "_COMPILER_ID";
   const char* compilerId = mf->GetDefinition(compilerIdVar.c_str());

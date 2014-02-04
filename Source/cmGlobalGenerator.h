@@ -421,9 +421,10 @@ private:
   void WriteSummary(cmTarget* target);
   void FinalizeTargetCompileInfo();
 
-  virtual void PrintCompilerAdvice(std::ostream& os, std::string lang,
+  virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
                                    const char* envVar) const;
-  void CheckCompilerIdCompatibility(cmMakefile* mf, std::string lang) const;
+  void CheckCompilerIdCompatibility(cmMakefile* mf,
+                                    std::string const& lang) const;
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 
