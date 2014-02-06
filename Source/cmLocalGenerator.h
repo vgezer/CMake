@@ -194,7 +194,7 @@ public:
    *   the source directory of this generator.  This should only be
    *   used for dependencies of custom commands.
    */
-  bool GetRealDependency(const char* name, const char* config,
+  bool GetRealDependency(const std::string& name, const char* config,
                          std::string& dep);
 
   ///! for existing files convert to output path and short path if spaces

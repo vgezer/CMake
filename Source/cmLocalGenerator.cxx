@@ -1999,7 +1999,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
-bool cmLocalGenerator::GetRealDependency(const char* inName,
+bool cmLocalGenerator::GetRealDependency(const std::string& inName,
                                          const char* config,
                                          std::string& dep)
 {
@@ -2027,7 +2027,7 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName
-    if(cmSystemTools::FileIsFullPath(inName))
+    if(cmSystemTools::FileIsFullPath(inName.c_str()))
       {
       std::string tLocation;
       if(target->GetType() >= cmTarget::EXECUTABLE &&
@@ -2075,7 +2075,7 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
     }
 
   // The name was not that of a CMake target.  It must name a file.
-  if(cmSystemTools::FileIsFullPath(inName))
+  if(cmSystemTools::FileIsFullPath(inName.c_str()))
     {
     // This is a full path.  Return it as given.
     dep = inName;

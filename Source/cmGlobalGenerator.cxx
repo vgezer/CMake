@@ -2073,7 +2073,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
 
 ///! Find a local generator by its startdirectory
 cmLocalGenerator*
-cmGlobalGenerator::FindLocalGenerator(const char* start_dir) const
+cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
 {
   for(std::vector<cmLocalGenerator*>::const_iterator it =
       this->LocalGenerators.begin(); it != this->LocalGenerators.end(); ++it)
@@ -2088,20 +2088,20 @@ cmGlobalGenerator::FindLocalGenerator(const char* start_dir) const
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddAlias(const char *name, cmTarget *tgt)
+void cmGlobalGenerator::AddAlias(const std::string& name, cmTarget *tgt)
 {
   this->AliasTargets[name] = tgt;
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::IsAlias(const char *name) const
+bool cmGlobalGenerator::IsAlias(const std::string& name) const
 {
   return this->AliasTargets.find(name) != this->AliasTargets.end();
 }
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmGlobalGenerator::FindTarget(const char* project, const char* name,
+cmGlobalGenerator::FindTarget(const char* project, const std::string& name,
                               bool excludeAliases) const
 {
   // if project specific
@@ -2513,7 +2513,7 @@ void cmGlobalGenerator::EnableMinGWLanguage(cmMakefile *mf)
 
 //----------------------------------------------------------------------------
 cmTarget cmGlobalGenerator::CreateGlobalTarget(
-  const char* name, const char* message,
+  const std::string& name, const char* message,
   const cmCustomCommandLines* commandLines,
   std::vector<std::string> depends,
   const char* workingDirectory)

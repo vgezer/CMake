@@ -1665,7 +1665,7 @@ void cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 std::string cmMakefileTargetGenerator::GetLinkRule(
-                                              const cmStdString& linkRuleVar)
+                                              const std::string& linkRuleVar)
 {
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
   if(this->Target->HasImplibGNUtoMS())

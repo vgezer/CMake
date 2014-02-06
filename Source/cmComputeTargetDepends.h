@@ -45,12 +45,14 @@ private:
   void CollectTargets();
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
-  void AddTargetDepend(int depender_index, const char* dependee_name,
+  void AddTargetDepend(int depender_index,
+                       const std::string& dependee_name,
                        bool linking);
   void AddTargetDepend(int depender_index, cmTarget const* dependee,
                        bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
-  void AddInterfaceDepends(int depender_index, const char* dependee_name,
+  void AddInterfaceDepends(int depender_index,
+                           const std::string& dependee_name,
                            bool linking, std::set<cmStdString> &emitted);
   void AddInterfaceDepends(int depender_index, cmTarget const* dependee,
                            const char *config,

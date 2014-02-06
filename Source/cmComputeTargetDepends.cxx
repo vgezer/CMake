@@ -298,7 +298,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
 
 //----------------------------------------------------------------------------
 void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
-                                             const char* dependee_name,
+                                             const std::string& dependee_name,
                                              bool linking,
                                              std::set<cmStdString> &emitted)
 {
@@ -333,7 +333,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
 
 //----------------------------------------------------------------------------
 void cmComputeTargetDepends::AddTargetDepend(int depender_index,
-                                             const char* dependee_name,
+                                             const std::string& dependee_name,
                                              bool linking)
 {
   // Get the depender.

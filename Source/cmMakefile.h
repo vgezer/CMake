@@ -205,10 +205,11 @@ public:
   void AddCompileOption(const char* option);
 
   /** Create a new imported target with the name and type given.  */
-  cmTarget* AddImportedTarget(const char* name, cmTarget::TargetType type,
+  cmTarget* AddImportedTarget(const std::string& name,
+                              cmTarget::TargetType type,
                               bool global);
 
-  cmTarget* AddNewTarget(cmTarget::TargetType type, const char* name);
+  cmTarget* AddNewTarget(cmTarget::TargetType type, const std::string& name);
 
   /**
    * Add an executable to the build.
@@ -239,16 +240,16 @@ public:
   /**
    * Add a link library to the build.
    */
-  void AddLinkLibrary(const char*);
-  void AddLinkLibrary(const char*, cmTarget::LinkLibraryType type);
-  void AddLinkLibraryForTarget(const char *tgt, const char*,
+  void AddLinkLibrary(const std::string&);
+  void AddLinkLibrary(const std::string&, cmTarget::LinkLibraryType type);
+  void AddLinkLibraryForTarget(const std::string& tgt, const std::string&,
                                cmTarget::LinkLibraryType type);
-  void AddLinkDirectoryForTarget(const char *tgt, const char* d);
+  void AddLinkDirectoryForTarget(const std::string& tgt, const std::string& d);
 
   /**
    * Add a link directory to the build.
    */
-  void AddLinkDirectory(const char*);
+  void AddLinkDirectory(const std::string&);
 
   const std::vector<std::string>& GetLinkDirectories() const
     {
@@ -326,7 +327,7 @@ public:
   cmTarget* AddLibrary(const char *libname, cmTarget::TargetType type,
                   const std::vector<std::string> &srcs,
                   bool excludeFromAll = false);
-  void AddAlias(const char *libname, cmTarget *tgt);
+  void AddAlias(const std::string& libname, cmTarget *tgt);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   /**
@@ -534,7 +535,7 @@ public:
   cmTarget* FindTargetToUse(const std::string& name,
                             bool excludeAliases = false) const;
   bool IsAlias(const std::string& name) const;
-  cmGeneratorTarget* FindGeneratorTargetToUse(const char* name) const;
+  cmGeneratorTarget* FindGeneratorTargetToUse(const std::string& name) const;
 
   /**
    * Mark include directories as system directories.
