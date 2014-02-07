@@ -372,7 +372,7 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name, cmTarget::TargetType type,
+  std::ostream& fout, const std::string& name, cmTarget::TargetType type,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {

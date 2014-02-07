@@ -90,7 +90,7 @@ public:
 
   ///! Create a GUID or get an existing one.
   void CreateGUID(const char* name);
-  std::string GetGUID(const char* name);
+  std::string GetGUID(const std::string& name);
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,

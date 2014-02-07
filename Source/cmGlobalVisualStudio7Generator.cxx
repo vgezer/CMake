@@ -653,7 +653,7 @@ cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
-                               const char* dspname,
+                               const std::string& dspname,
                                const char* dir, cmTarget const& target)
 {
    // check to see if this is a fortran build
@@ -693,7 +693,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
 void
 cmGlobalVisualStudio7Generator
 ::WriteProjectDepends(std::ostream& fout,
-                      const char* dspname,
+                      const std::string& dspname,
                       const char*, cmTarget const& target)
 {
   int depcount = 0;
@@ -729,7 +729,7 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name, cmTarget::TargetType,
+  std::ostream& fout, const std::string& name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {
@@ -757,7 +757,7 @@ void cmGlobalVisualStudio7Generator
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
-                               const char* name,
+                               const std::string& name,
                                const char* location,
                                const char* typeGuid,
                                const std::set<cmStdString>&)
@@ -907,7 +907,7 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
   return pname;
 }
 
-std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)
+std::string cmGlobalVisualStudio7Generator::GetGUID(const std::string& name)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";

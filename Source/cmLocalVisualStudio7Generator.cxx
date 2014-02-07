@@ -228,7 +228,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator
-::CreateSingleVCProj(const char *lname, cmTarget &target)
+::CreateSingleVCProj(const std::string& lname, cmTarget &target)
 {
   this->FortranProject =
     static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
@@ -245,7 +245,7 @@ void cmLocalVisualStudio7Generator
     }
 
   // add to the list of projects
-  std::string pname = lname;
+  std::string const& pname = lname;
   target.SetProperty("GENERATOR_FILE_NAME",lname);
   // create the dsp.cmake file
   std::string fname;
@@ -334,8 +334,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 }
 
 void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
-                                                        const char *libName,
-                                                        cmTarget &target)
+                                                    const std::string& libName,
+                                                    cmTarget &target)
 {
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
@@ -1955,7 +1955,7 @@ void cmLocalVisualStudio7Generator::WriteProjectSCC(std::ostream& fout,
 void
 cmLocalVisualStudio7Generator
 ::WriteProjectStartFortran(std::ostream& fout,
-                           const char *libName,
+                           const std::string& libName,
                            cmTarget & target)
 {
 
@@ -2015,7 +2015,7 @@ cmLocalVisualStudio7Generator
 
 void
 cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
-                                                 const char *libName,
+                                                 const std::string& libName,
                                                  cmTarget & target,
                                                  std::vector<cmSourceGroup> &)
 {
@@ -2038,7 +2038,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
   const char* projLabel = target.GetProperty("PROJECT_LABEL");
   if(!projLabel)
     {
-    projLabel = libName;
+    projLabel = libName.c_str();
     }
   const char* keyword = target.GetProperty("VS_KEYWORD");
   if(!keyword)
