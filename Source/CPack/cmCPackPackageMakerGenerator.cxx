@@ -553,8 +553,9 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
-                                                          const char* dirName)
+bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(
+                                            const std::string& name,
+                                            const std::string& dirName)
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
