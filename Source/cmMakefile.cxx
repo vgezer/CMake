@@ -1470,7 +1470,7 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
   if ( i != this->Targets.end())
     {
     cmTarget* tgt =
-      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0,lib);
+      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(lib);
     if(tgt)
       {
       // if it is not a static or shared library then you can not link to it
@@ -4063,8 +4063,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
     }
 
   // Look for a target built in this project.
-  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0,
-                                                              name.c_str(),
+  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(name.c_str(),
                                                               excludeAliases);
 }
 
