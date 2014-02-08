@@ -1187,7 +1187,7 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddUtilityCommand(const char* utilityName,
+void cmMakefile::AddUtilityCommand(const std::string& utilityName,
                                    bool excludeFromAll,
                                    const std::vector<std::string>& depends,
                                    const char* workingDirectory,
@@ -1226,7 +1226,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddUtilityCommand(const char* utilityName,
+cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
                               const char* workingDirectory,
                               const std::vector<std::string>& depends,
