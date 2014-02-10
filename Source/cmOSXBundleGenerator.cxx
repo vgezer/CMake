@@ -19,7 +19,7 @@
 //----------------------------------------------------------------------------
 cmOSXBundleGenerator::
 cmOSXBundleGenerator(cmGeneratorTarget* target,
-                     const char* configName)
+                     const std::string& configName)
  : Target(target->Target)
  , Makefile(target->Target->GetMakefile())
  , LocalGenerator(Makefile->GetLocalGenerator())

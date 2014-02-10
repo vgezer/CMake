@@ -637,9 +637,9 @@ private:
 
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
-                                                       const char* configName,
-                                                       const char *libName,
-                                                       cmTarget &target)
+                                                const std::string& configName,
+                                                const char *libName,
+                                                cmTarget &target)
 {
   const char* mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if(!mfcFlag)
@@ -745,7 +745,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                         table,
                         this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
-  std::string asmLocation = std::string(configName) + "/";
+  std::string asmLocation = configName + "/";
   targetOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
@@ -1893,7 +1893,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjEndGroup(std::ostream& fout)
 // look for custom rules on a target and collect them together
 void cmLocalVisualStudio7Generator
 ::OutputTargetRules(std::ostream& fout,
-                    const char* configName,
+                    const std::string& configName,
                     cmTarget &target,
                     const char * /*libName*/)
 {

@@ -1551,7 +1551,7 @@ void  cmGlobalXCodeGenerator
                             cmTarget& target,
                             std::vector<cmCustomCommand>
                             const & commands,
-                            const char* configName,
+                            const std::string& configName,
                             const std::map<std::string,
                             std::string>& multipleOutputPairs
                            )
@@ -1694,8 +1694,8 @@ void  cmGlobalXCodeGenerator
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
-                                                 cmXCodeObject* buildSettings,
-                                                 const char* configName)
+                                                cmXCodeObject* buildSettings,
+                                                const std::string& configName)
 {
   if(target.GetType() == cmTarget::INTERFACE_LIBRARY)
     {
@@ -1808,7 +1808,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       this->CurrentLocalGenerator->
         AppendFlags(extraLinkOptions, targetLinkFlags);
       }
-    if(configName && *configName)
+    if(!configName.empty())
       {
       std::string linkFlagsVar = "LINK_FLAGS_";
       linkFlagsVar += cmSystemTools::UpperCase(configName);
@@ -3781,7 +3781,7 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
 void
 cmGlobalXCodeGenerator
 ::AppendDirectoryForConfig(const char* prefix,
-                           const char* config,
+                           const std::string& config,
                            const char* suffix,
                            std::string& dir)
 {

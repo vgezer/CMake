@@ -2557,7 +2557,8 @@ std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
+void cmGlobalGenerator::AppendDirectoryForConfig(const char*,
+                                                 const std::string&,
                                                  const char*, std::string&)
 {
   // Subclasses that support multiple configurations should implement
@@ -2708,7 +2709,7 @@ void cmGlobalGenerator::AddTargetDepends(cmTarget const* target,
 
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddToManifest(const char* config,
+void cmGlobalGenerator::AddToManifest(const std::string& config,
                                       std::string const& f)
 {
   // Add to the main manifest for this configuration.

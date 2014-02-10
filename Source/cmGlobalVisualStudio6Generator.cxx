@@ -418,11 +418,11 @@ void cmGlobalVisualStudio6Generator
 void
 cmGlobalVisualStudio6Generator
 ::AppendDirectoryForConfig(const char* prefix,
-                           const char* config,
+                           const std::string& config,
                            const char* suffix,
                            std::string& dir)
 {
-  if(config)
+  if(!config.empty())
     {
     dir += prefix;
     dir += config;

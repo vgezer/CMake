@@ -184,7 +184,8 @@ cmComputeLinkDepends
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // The configuration being linked.
-  this->Config = (config && *config)? config : 0;
+  this->HasConfig = config && *config;
+  this->Config = (this->HasConfig)? config : "";
   this->LinkType = this->Target->ComputeLinkType(this->Config);
 
   // Enable debug mode if requested.
@@ -254,7 +255,8 @@ cmComputeLinkDepends::Compute()
             "---------------------------------------"
             "---------------------------------------\n");
     fprintf(stderr, "Link dependency analysis for target %s, config %s\n",
-            this->Target->GetName(), this->Config?this->Config:"noconfig");
+            this->Target->GetName(),
+            this-HasConfig?this->Config.c_str():"noconfig");
     this->DisplayConstraintGraph();
     }
 

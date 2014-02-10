@@ -3796,11 +3796,12 @@ bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmMakefile::GetFeature(const char* feature, const char* config)
+const char* cmMakefile::GetFeature(const char* feature,
+                                   const std::string& config)
 {
   // TODO: Define accumulation policy for features (prepend, append, replace).
   // Currently we always replace.
-  if(config && *config)
+  if(!config.empty())
     {
     std::string featureConfig = feature;
     featureConfig += "_";

@@ -82,7 +82,7 @@ public:
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
+                                        const std::string& config,
                                         const char* suffix,
                                         std::string& dir);
 

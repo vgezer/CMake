@@ -68,7 +68,8 @@ private:
   bool DebugMode;
 
   // Configuration information.
-  const char* Config;
+  bool HasConfig;
+  std::string Config;
   cmTarget::LinkLibraryType LinkType;
 
   // Output information.

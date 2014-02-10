@@ -172,7 +172,7 @@ public:
   cmExportSetMap& GetExportSets() {return this->ExportSets;}
 
   /** Add a file to the manifest of generated targets for a configuration.  */
-  void AddToManifest(const char* config, std::string const& f);
+  void AddToManifest(const std::string& config, std::string const& f);
 
   void EnableInstallTarget();
 
@@ -230,7 +230,7 @@ public:
       appended the given prefix and suffix will be appended around it, which
       is useful for leading or trailing slashes.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
+                                        const std::string& config,
                                         const char* suffix,
                                         std::string& dir);
 

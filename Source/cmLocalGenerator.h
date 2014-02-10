@@ -138,16 +138,16 @@ public:
 
 
   void AddArchitectureFlags(std::string& flags, cmGeneratorTarget* target,
-                            const char *lang, const char* config);
+                            const char *lang, const std::string& config);
 
   void AddLanguageFlags(std::string& flags, const char* lang,
-                        const char* config);
+                        const std::string& config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
-                       std::string const& lang, const char *config);
+                       std::string const& lang, const std::string& config);
   void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
                                 const char *lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
-                              const char* config);
+                              const std::string& config);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   virtual void AppendFlagEscape(std::string& flags,
@@ -156,7 +156,7 @@ public:
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               cmGeneratorTarget* target,
                               const char* lang, bool forResponseFile = false,
-                              const char *config = 0);
+                              const std::string& config = "");
 
   /**
    * Encode a list of preprocessor definitions for the compiler
@@ -195,7 +195,7 @@ public:
    *   the source directory of this generator.  This should only be
    *   used for dependencies of custom commands.
    */
-  bool GetRealDependency(const std::string& name, const char* config,
+  bool GetRealDependency(const std::string& name, const std::string& config,
                          std::string& dep);
 
   ///! for existing files convert to output path and short path if spaces
@@ -222,13 +222,14 @@ public:
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
                              cmGeneratorTarget* target,
-                             const char* lang = "C", const char *config = 0,
+                             const char* lang = "C",
+                             const std::string& config = "",
                              bool stripImplicitInclDirs = true);
   void AddCompileOptions(std::string& flags, cmTarget* target,
-                         const char* lang, const char* config);
+                         const char* lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmTarget const* target,
-                             const char* config);
+                             const std::string& config);
 
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);
