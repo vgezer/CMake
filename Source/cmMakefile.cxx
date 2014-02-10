@@ -3796,7 +3796,7 @@ bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmMakefile::GetFeature(const char* feature,
+const char* cmMakefile::GetFeature(const std::string& feature,
                                    const std::string& config)
 {
   // TODO: Define accumulation policy for features (prepend, append, replace).

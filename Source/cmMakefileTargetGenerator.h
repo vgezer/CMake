@@ -258,8 +258,8 @@ protected:
   void AddFeatureFlags(std::string& flags, const char* lang);
 
   // Feature query methods.
-  const char* GetFeature(const char* feature);
-  bool GetFeatureAsBool(const char* feature);
+  const char* GetFeature(const std::string& feature);
+  bool GetFeatureAsBool(const std::string& feature);
 
   //==================================================================
   // Convenience routines that do nothing more than forward to

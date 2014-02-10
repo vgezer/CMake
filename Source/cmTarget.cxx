@@ -2600,7 +2600,7 @@ void cmTarget::GetTargetVersion(bool soversion,
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetFeature(const char* feature,
+const char* cmTarget::GetFeature(const std::string& feature,
                                  const std::string& config) const
 {
   if(!config.empty())
