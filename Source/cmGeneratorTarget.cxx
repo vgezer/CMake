@@ -213,7 +213,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                 = this->Target->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
     std::vector<std::string> result;
-    for (std::set<cmStdString>::const_iterator
+    for (std::set<std::string>::const_iterator
         it = this->Target->GetSystemIncludeDirectories().begin();
         it != this->Target->GetSystemIncludeDirectories().end(); ++it)
       {
@@ -224,7 +224,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                           &dagChecker), result);
       }
 
-    std::set<cmStdString> uniqueDeps;
+    std::set<std::string> uniqueDeps;
     for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
         li != impl->Libraries.end(); ++li)
       {
@@ -254,7 +254,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
           }
         }
       }
-    std::set<cmStdString> unique;
+    std::set<std::string> unique;
     for(std::vector<std::string>::iterator li = result.begin();
         li != result.end(); ++li)
       {
@@ -262,7 +262,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
       unique.insert(*li);
       }
     result.clear();
-    for(std::set<cmStdString>::iterator li = unique.begin();
+    for(std::set<std::string>::iterator li = unique.begin();
         li != unique.end(); ++li)
       {
       result.push_back(*li);
@@ -474,7 +474,7 @@ private:
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;
-  typedef std::map<cmStdString, cmSourceFile*> NameMapType;
+  typedef std::map<std::string, cmSourceFile*> NameMapType;
   NameMapType NameMap;
 
   void QueueSource(cmSourceFile* sf);
