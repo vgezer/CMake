@@ -82,7 +82,6 @@ public:
    */
   void TraceDependencies();
 
-  void ClassifySources();
   void LookupObjectLibraries();
 
   /** Get sources that must be built before the given source.  */
@@ -113,28 +112,40 @@ public:
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
+  struct ResxData {
+    mutable std::set<std::string> ExpectedResxHeaders;
+    mutable std::vector<cmSourceFile*> ResxSources;
+  };
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
-  std::string ModuleDefinitionFile;
+  mutable std::string ModuleDefinitionFile;
 
-  std::vector<cmSourceFile*> CustomCommands;
-  std::vector<cmSourceFile*> ExtraSources;
-  std::vector<cmSourceFile*> HeaderSources;
-  std::vector<cmSourceFile*> ExternalObjects;
-  std::vector<cmSourceFile*> IDLSources;
-  std::vector<cmSourceFile*> ResxSources;
+  mutable ResxData Resx;
+
+  mutable bool SourceFileFlagsConstructed;
+  mutable bool ObjectSourcesDone;
+  mutable bool IDLSourcesDone;
+  mutable bool ExtraSourcesDone;
+  mutable bool HeaderSourcesDone;
+  mutable bool CustomCommandsDone;
+  mutable bool ExternalObjectsDone;
+  mutable bool ResxDone;
+  mutable bool ModuleDefinitionFileDone;
+  mutable std::vector<cmSourceFile*> CustomCommands;
+  mutable std::vector<cmSourceFile*> ExtraSources;
+  mutable std::vector<cmSourceFile*> HeaderSources;
+  mutable std::vector<cmSourceFile*> ExternalObjects;
+  mutable std::vector<cmSourceFile*> IDLSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
-  std::set<std::string> ExpectedResxHeaders;
-  std::vector<cmSourceFile*> ObjectSources;
+  mutable std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   void ConstructSourceFileFlags() const;
-  mutable bool SourceFileFlagsConstructed;
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
