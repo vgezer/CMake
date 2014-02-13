@@ -705,10 +705,6 @@ private:
   void CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                   const std::string& config) const;
 
-  void ComputeLinkInterface(const std::string& config, LinkInterface& iface,
-                            cmTarget const* head,
-                            const char *explicitLibraries) const;
-
   const char* ComputeLinkInterfaceLibraries(const std::string& config,
                                             LinkInterface& iface,
                                             cmTarget const* head,
