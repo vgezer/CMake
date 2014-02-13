@@ -96,8 +96,11 @@ public:
   // Cache link interface computation from each configuration.
   struct OptionalLinkInterface: public cmTarget::LinkInterface
   {
-    OptionalLinkInterface(): Exists(false) {}
+    OptionalLinkInterface():
+      Exists(false), Complete(false), ExplicitLibraries(0) {}
     bool Exists;
+    bool Complete;
+    const char* ExplicitLibraries;
   };
   void ComputeLinkInterface(cmTarget const* thisTarget,
                             const std::string& config,
@@ -5195,17 +5198,72 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
     {
     // Compute the link interface for this configuration.
     cmTargetInternals::OptionalLinkInterface iface;
-    const char* explicitLibraries =
+    iface.ExplicitLibraries =
         this->ComputeLinkInterfaceLibraries(config, iface, head, iface.Exists);
-    this->Internal->ComputeLinkInterface(this, config, iface,
-                                         head, explicitLibraries);
+    if (iface.Exists)
+      {
+      this->Internal->ComputeLinkInterface(this, config, iface,
+                                           head, iface.ExplicitLibraries);
+      }
+
+    // Store the information for this configuration.
+    cmTargetInternals::LinkInterfaceMapType::value_type entry(key, iface);
+    i = this->Internal->LinkInterfaceMap.insert(entry).first;
+    }
+  else if(!i->second.Complete)
+    {
+      this->Internal->ComputeLinkInterface(this, config,
+                                           i->second,
+                                              head,
+                                              i->second.ExplicitLibraries);
+    }
+
+  return i->second.Exists ? &i->second : 0;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::LinkInterface const*
+cmTarget::GetLinkInterfaceLibraries(const std::string& config,
+                                    cmTarget const* head) const
+{
+  // Imported targets have their own link interface.
+  if(this->IsImported())
+    {
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, head))
+      {
+      return &info->LinkInterface;
+      }
+    return 0;
+    }
+
+  // Link interfaces are not supported for executables that do not
+  // export symbols.
+  if(this->GetType() == cmTarget::EXECUTABLE &&
+     !this->IsExecutableWithExports())
+    {
+    return 0;
+    }
+
+  // Lookup any existing link interface for this configuration.
+  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+
+  cmTargetInternals::LinkInterfaceMapType::iterator
+    i = this->Internal->LinkInterfaceMap.find(key);
+  if(i == this->Internal->LinkInterfaceMap.end())
+    {
+    // Compute the link interface for this configuration.
+    cmTargetInternals::OptionalLinkInterface iface;
+    iface.ExplicitLibraries = this->ComputeLinkInterfaceLibraries(config,
+                                                                iface,
+                                                                head,
+                                                                iface.Exists);
 
     // Store the information for this configuration.
     cmTargetInternals::LinkInterfaceMapType::value_type entry(key, iface);
     i = this->Internal->LinkInterfaceMap.insert(entry).first;
     }
 
-  return i->second.Exists? &i->second : 0;
+  return i->second.Exists ? &i->second : 0;
 }
 
 //----------------------------------------------------------------------------
@@ -5213,8 +5271,8 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
                                       cmTarget const* headTarget,
                                       std::vector<cmTarget*> &tgts) const
 {
-  cmTarget::LinkInterface const* iface = this->GetLinkInterface(config,
-                                                                headTarget);
+  cmTarget::LinkInterface const* iface =
+                          this->GetLinkInterfaceLibraries(config, headTarget);
   if (!iface)
     {
     return;
@@ -5375,8 +5433,8 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
     // to the link implementation.
     {
     // The link implementation is the default link interface.
-    LinkImplementation const* impl = this->GetLinkImplementation(config,
-                                                              headTarget);
+    LinkImplementation const* impl =
+        this->GetLinkImplementationLibraries(config, headTarget);
     iface.Libraries = impl->Libraries;
     if(this->PolicyStatusCMP0022 == cmPolicies::WARN &&
        !this->Internal->PolicyWarnedCMP0022)
@@ -5502,10 +5560,6 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
     }
   else if (thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN
         || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
-    // If CMP0022 is NEW then the plain tll signature sets the
-    // INTERFACE_LINK_LIBRARIES, so if we get here then the project
-    // cleared the property explicitly and we should not fall back
-    // to the link implementation.
     {
     // The link implementation is the default link interface.
     cmTarget::LinkImplementation const* impl =
@@ -5546,6 +5600,7 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
       sscanf(reps, "%u", &iface.Multiplicity);
       }
     }
+  iface.Complete = true;
 }
 
 //----------------------------------------------------------------------------
@@ -5570,6 +5625,40 @@ cmTarget::GetLinkImplementation(const std::string& config,
     LinkImplementation impl;
     this->ComputeLinkImplementation(config, impl, head);
     this->ComputeLinkImplementationLanguages(impl);
+
+    // Store the information for this configuration.
+    cmTargetInternals::LinkImplMapType::value_type entry(key, impl);
+    i = this->Internal->LinkImplMap.insert(entry).first;
+    }
+  else if (i->second.Languages.empty())
+    {
+    this->ComputeLinkImplementationLanguages(i->second);
+    }
+
+  return &i->second;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::LinkImplementation const*
+cmTarget::GetLinkImplementationLibraries(const std::string& config,
+                                         cmTarget const* head) const
+{
+  // There is no link implementation for imported targets.
+  if(this->IsImported())
+    {
+    return 0;
+    }
+
+  // Lookup any existing link implementation for this configuration.
+  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+
+  cmTargetInternals::LinkImplMapType::iterator
+    i = this->Internal->LinkImplMap.find(key);
+  if(i == this->Internal->LinkImplMap.end())
+    {
+    // Compute the link implementation for this configuration.
+    LinkImplementation impl;
+    this->ComputeLinkImplementation(config, impl, head);
 
     // Store the information for this configuration.
     cmTargetInternals::LinkImplMapType::value_type entry(key, impl);
