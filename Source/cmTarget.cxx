@@ -5520,6 +5520,7 @@ cmTarget::GetLinkImplementation(const char* config, cmTarget const* head) const
     // Compute the link implementation for this configuration.
     LinkImplementation impl;
     this->ComputeLinkImplementation(config, impl, head);
+    this->ComputeLinkImplementationLanguages(impl);
 
     // Store the information for this configuration.
     cmTargetInternals::LinkImplMapType::value_type entry(key, impl);
@@ -5602,7 +5603,12 @@ void cmTarget::ComputeLinkImplementation(const char* config,
       impl.WrongConfigLibraries.push_back(item);
       }
     }
+}
 
+//----------------------------------------------------------------------------
+void
+cmTarget::ComputeLinkImplementationLanguages(LinkImplementation& impl) const
+{
   // This target needs runtime libraries for its source languages.
   std::set<cmStdString> languages;
   // Get languages used in our source files.
