@@ -267,9 +267,9 @@ public:
       if the target cannot be linked.  */
   LinkInterface const* GetLinkInterface(const std::string& config,
                                         cmTarget const* headTarget) const;
-  void GetTransitivePropertyLinkLibraries(const std::string& config,
+  void GetTransitivePropertyTargets(const std::string& config,
                                         cmTarget const* headTarget,
-                                        std::vector<std::string> &libs) const;
+                                        std::vector<cmTarget*> &libs) const;
 
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
