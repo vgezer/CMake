@@ -5354,7 +5354,22 @@ bool cmTarget::ComputeLinkInterface(const std::string& config,
                                         false,
                                         headTarget,
                                         this, &dagChecker), iface.Libraries);
+    }
+  else if (this->PolicyStatusCMP0022 == cmPolicies::WARN
+        || this->PolicyStatusCMP0022 == cmPolicies::OLD)
+    // If CMP0022 is NEW then the plain tll signature sets the
+    // INTERFACE_LINK_LIBRARIES, so if we get here then the project
+    // cleared the property explicitly and we should not fall back
+    // to the link implementation.
+    {
+    // The link implementation is the default link interface.
+    LinkImplementation const* impl = this->GetLinkImplementation(config,
+                                                              headTarget);
+    iface.Libraries = impl->Libraries;
+    }
 
+  if(explicitLibraries)
+    {
     if(this->GetType() == cmTarget::SHARED_LIBRARY
         || this->GetType() == cmTarget::STATIC_LIBRARY
         || this->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -5412,7 +5427,6 @@ bool cmTarget::ComputeLinkInterface(const std::string& config,
     LinkImplementation const* impl = this->GetLinkImplementation(config,
                                                               headTarget);
     iface.ImplementationIsInterface = true;
-    iface.Libraries = impl->Libraries;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     if(this->LinkLanguagePropagatesToDependents())
       {
