@@ -334,11 +334,6 @@ public:
   void
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
-  /**
-   * Make sure the full path to all source files is known.
-   */
-  bool FindSourceFiles();
-
   ///! Return the preferred linker language for this target
   const char* GetLinkerLanguage(const std::string& config = "",
                                 cmTarget const* head = 0) const;
