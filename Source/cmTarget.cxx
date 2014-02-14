@@ -522,28 +522,6 @@ bool cmTarget::IsBundleOnApple() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::FindSourceFiles()
-{
-  for(std::vector<cmSourceFile*>::const_iterator
-        si = this->SourceFiles.begin();
-      si != this->SourceFiles.end(); ++si)
-    {
-    std::string e;
-    if((*si)->GetFullPath(&e).empty())
-      {
-      if(!e.empty())
-        {
-        cmake* cm = this->Makefile->GetCMakeInstance();
-        cm->IssueMessage(cmake::FATAL_ERROR, e,
-                         this->GetBacktrace());
-        }
-      return false;
-      }
-    }
-  return true;
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);

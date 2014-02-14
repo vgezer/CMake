@@ -24,6 +24,24 @@
 
 #include "assert.h"
 
+
+//----------------------------------------------------------------------------
+bool FindSourceFile(cmSourceFile *sf, cmTarget *tgt)
+{
+  std::string e;
+  if((sf)->GetFullPath(&e).empty())
+    {
+    if(!e.empty())
+      {
+      cmake* cm = tgt->GetMakefile()->GetCMakeInstance();
+      cm->IssueMessage(cmake::FATAL_ERROR, e,
+                       tgt->GetBacktrace());
+      }
+    return false;
+    }
+  return true;
+}
+
 //----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
   SourceFileFlagsConstructed(false)
@@ -305,6 +323,10 @@ void cmGeneratorTarget::ClassifySources()
       si != sources.end(); ++si)
     {
     cmSourceFile* sf = *si;
+    if (!FindSourceFile(sf, this->Target))
+      {
+      return;
+      }
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
     if(sf->GetCustomCommand())
       {
