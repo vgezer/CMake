@@ -453,6 +453,12 @@ void cmGeneratorTarget::LookupObjectLibraries()
 }
 
 //----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetModuleDefinitionFile() const
+{
+  return this->ModuleDefinitionFile;
+}
+
+//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs) const
 {
