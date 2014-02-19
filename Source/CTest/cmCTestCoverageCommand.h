@@ -56,7 +56,7 @@ protected:
   };
 
   bool LabelsMentioned;
-  std::set<std::string> Labels;
+  std::set<cmStdString> Labels;
 };
 
 

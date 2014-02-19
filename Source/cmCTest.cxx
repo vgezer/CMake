@@ -1153,7 +1153,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
   int* retVal, const char* dir, int timeout, std::ostream& ofs)
 {
   // First generate the command and arguments
-  std::vector<std::string> args = cmSystemTools::ParseArguments(command);
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
 
   if(args.size() < 1)
     {
@@ -1161,7 +1161,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     }
 
   std::vector<const char*> argv;
-  for(std::vector<std::string>::const_iterator a = args.begin();
+  for(std::vector<cmStdString>::const_iterator a = args.begin();
     a != args.end(); ++a)
     {
     argv.push_back(a->c_str());
@@ -1637,7 +1637,7 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
 }
 
 //----------------------------------------------------------------------
-int cmCTest::GenerateNotesFile(const VectorOfStrings &files)
+int cmCTest::GenerateNotesFile(const std::vector<cmStdString> &files)
 {
   cmGeneratedFileStream ofs;
   if ( !this->OpenOutputFile(this->CurrentTag, "Notes.xml", ofs) )
@@ -1658,7 +1658,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
     return 1;
     }
 
-  VectorOfStrings files;
+  std::vector<cmStdString> files;
 
   cmCTestLog(this, OUTPUT, "Create notes file" << std::endl);
 
@@ -1675,7 +1675,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
 std::string cmCTest::Base64GzipEncodeFile(std::string file)
 {
   std::string tarFile = file + "_temp.tar.gz";
-  std::vector<std::string> files;
+  std::vector<cmStdString> files;
   files.push_back(file);
 
   if(!cmSystemTools::CreateTar(tarFile.c_str(), files, true, false, false))
@@ -1722,9 +1722,9 @@ std::string cmCTest::Base64EncodeFile(std::string file)
 
 
 //----------------------------------------------------------------------
-bool cmCTest::SubmitExtraFiles(const VectorOfStrings &files)
+bool cmCTest::SubmitExtraFiles(const std::vector<cmStdString> &files)
 {
-  VectorOfStrings::const_iterator it;
+  std::vector<cmStdString>::const_iterator it;
   for ( it = files.begin();
     it != files.end();
     ++ it )
@@ -1749,7 +1749,7 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
     return 1;
     }
 
-  VectorOfStrings files;
+  std::vector<cmStdString> files;
 
   cmCTestLog(this, OUTPUT, "Submit extra files" << std::endl);
 
@@ -2126,7 +2126,7 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
     {
     i++;
-    this->AddCTestConfigurationOverwrite(args[i]);
+    this->AddCTestConfigurationOverwrite(args[i].c_str());
     }
   if(this->CheckArgument(arg, "-A", "--add-notes") && i < args.size() - 1)
     {
@@ -2593,9 +2593,13 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
-  std::vector<std::string>& vec)
+void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
+  VectorOfStrings& vec)
 {
+  if ( !def)
+    {
+    return;
+    }
   const char* dval = mf->GetDefinition(def);
   if ( !dval )
     {
@@ -2616,9 +2620,12 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
 }
 
 //----------------------------------------------------------------------
-void cmCTest::PopulateCustomInteger(cmMakefile* mf, const std::string& def,
-  int& val)
+void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
 {
+  if ( !def)
+    {
+    return;
+    }
   const char* dval = mf->GetDefinition(def);
   if ( !dval )
     {
@@ -2695,7 +2702,7 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
 }
 
 //----------------------------------------------------------------------
-std::string cmCTest::GetCTestConfiguration(const std::string& name)
+std::string cmCTest::GetCTestConfiguration(const char *name)
 {
   if ( this->CTestConfigurationOverwrites.find(name) !=
     this->CTestConfigurationOverwrites.end() )
@@ -2840,8 +2847,9 @@ void cmCTest::AddSubmitFile(Part part, const char* name)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
+void cmCTest::AddCTestConfigurationOverwrite(const char* encstr)
 {
+  std::string overStr = encstr;
   size_t epos = overStr.find("=");
   if ( epos == overStr.npos )
     {
@@ -2869,7 +2877,7 @@ void cmCTest::SetConfigType(const char* ct)
 
 //----------------------------------------------------------------------
 bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
-  const char* dconfig, const std::string& cmake_var)
+  const char* dconfig, const char* cmake_var)
 {
   const char* ctvar;
   ctvar = mf->GetDefinition(cmake_var);
@@ -2892,7 +2900,7 @@ bool cmCTest::RunCommand(
   const char* dir,
   double timeout)
 {
-  std::vector<std::string> args = cmSystemTools::ParseArguments(command);
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
 
   if(args.size() < 1)
     {
@@ -2900,7 +2908,7 @@ bool cmCTest::RunCommand(
     }
 
   std::vector<const char*> argv;
-  for(std::vector<std::string>::const_iterator a = args.begin();
+  for(std::vector<cmStdString>::const_iterator a = args.begin();
       a != args.end(); ++a)
     {
     argv.push_back(a->c_str());

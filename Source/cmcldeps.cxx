@@ -198,7 +198,7 @@ static int process( const std::string& srcfilename,
   std::vector<std::string> args;
   cmSystemTools::ParseWindowsCommandLine(cmd.c_str(), args);
   // convert to correct vector type for RunSingleCommand
-  std::vector<std::string> command;
+  std::vector<cmStdString> command;
   for(std::vector<std::string>::iterator i = args.begin();
       i != args.end(); ++i)
     {

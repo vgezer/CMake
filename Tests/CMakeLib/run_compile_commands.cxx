@@ -2,14 +2,14 @@
 
 class CompileCommandParser {
 public:
-  class CommandType: public std::map<std::string, std::string>
+  class CommandType: public std::map<cmStdString, cmStdString>
   {
   public:
-    std::string const& at(std::string const& k) const
+    cmStdString const& at(cmStdString const& k) const
       {
       const_iterator i = this->find(k);
       if(i != this->end()) { return i->second; }
-      static std::string emptyString;
+      static cmStdString emptyString;
       return emptyString;
       }
   };
@@ -127,7 +127,7 @@ int main ()
       it = parser.GetTranslationUnits().begin(),
       end = parser.GetTranslationUnits().end(); it != end; ++it)
     {
-    std::vector<std::string> command;
+    std::vector<cmStdString> command;
     cmSystemTools::ParseUnixCommandLine(it->at("command").c_str(), command);
     if (!cmSystemTools::RunSingleCommand(
             command, 0, 0, it->at("directory").c_str()))

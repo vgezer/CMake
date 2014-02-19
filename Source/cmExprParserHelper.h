@@ -49,8 +49,8 @@ public:
   const char* GetError() { return this->ErrorString.c_str(); }
 
 private:
-  std::string::size_type InputBufferPos;
-  std::string InputBuffer;
+  cmStdString::size_type InputBufferPos;
+  cmStdString InputBuffer;
   std::vector<char> OutputBuffer;
   int CurrentLine;
   int Verbose;

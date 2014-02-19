@@ -43,7 +43,7 @@ class cmGeneratorExpressionLexer
 public:
   cmGeneratorExpressionLexer();
 
-  std::vector<cmGeneratorExpressionToken> Tokenize(const std::string& input);
+  std::vector<cmGeneratorExpressionToken> Tokenize(const char *input);
 
   bool GetSawGeneratorExpression() const
   {

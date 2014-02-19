@@ -43,10 +43,10 @@ protected:
                                             bool hasManifest,
                                             bool verbose);
   static int ParseVisualStudioLinkCommand(std::vector<std::string>& args,
-                                          std::vector<std::string>& command,
+                                          std::vector<cmStdString>& command,
                                           std::string& targetName);
   static bool RunCommand(const char* comment,
-                         std::vector<std::string>& command,
+                         std::vector<cmStdString>& command,
                          bool verbose,
                          int* retCodeOut = 0);
 };

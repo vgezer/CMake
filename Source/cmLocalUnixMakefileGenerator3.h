@@ -210,11 +210,11 @@ public:
   // File pairs for implicit dependency scanning.  The key of the map
   // is the depender and the value is the explicit dependee.
   struct ImplicitDependFileMap:
-    public std::map<std::string, cmDepends::DependencyVector> {};
+    public std::map<cmStdString, cmDepends::DependencyVector> {};
   struct ImplicitDependLanguageMap:
-    public std::map<std::string, ImplicitDependFileMap> {};
+    public std::map<cmStdString, ImplicitDependFileMap> {};
   struct ImplicitDependTargetMap:
-    public std::map<std::string, ImplicitDependLanguageMap> {};
+    public std::map<cmStdString, ImplicitDependLanguageMap> {};
   ImplicitDependLanguageMap const& GetImplicitDepends(cmTarget const& tgt);
 
   void AddImplicitDepends(cmTarget const& tgt, const char* lang,
@@ -230,7 +230,7 @@ public:
                           std::string objNoTargetDir,
                           bool hasSourceExtension);
 
-  std::vector<std::string> const& GetLocalHelp() { return this->LocalHelp; }
+  std::vector<cmStdString> const& GetLocalHelp() { return this->LocalHelp; }
 
   /** Get whether to create rules to generate preprocessed and
       assembly sources.  This could be converted to a variable lookup
@@ -255,7 +255,7 @@ protected:
 
   // write the target rules for the local Makefile into the stream
   void WriteLocalMakefileTargets(std::ostream& ruleFileStream,
-                                 std::set<std::string> &emitted);
+                                 std::set<cmStdString> &emitted);
 
   // this method Writes the Directory information files
   void WriteDirectoryInformationFile();
@@ -369,16 +369,16 @@ private:
     LocalObjectInfo():HasSourceExtension(false), HasPreprocessRule(false),
                       HasAssembleRule(false) {}
   };
-  std::map<std::string, LocalObjectInfo> LocalObjectFiles;
+  std::map<cmStdString, LocalObjectInfo> LocalObjectFiles;
   void WriteObjectConvenienceRule(std::ostream& ruleFileStream,
                                   const char* comment, const char* output,
                                   LocalObjectInfo const& info);
 
-  std::vector<std::string> LocalHelp;
+  std::vector<cmStdString> LocalHelp;
 
   /* does the work for each target */
-  std::map<std::string, std::string> MakeVariableMap;
-  std::map<std::string, std::string> ShortMakeVariableMap;
+  std::map<cmStdString, cmStdString> MakeVariableMap;
+  std::map<cmStdString, cmStdString> ShortMakeVariableMap;
 };
 
 #endif

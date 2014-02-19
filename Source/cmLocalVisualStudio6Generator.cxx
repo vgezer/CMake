@@ -38,7 +38,7 @@ class cmLocalVisualStudio6Generator::EventWriter
 {
 public:
   EventWriter(cmLocalVisualStudio6Generator* lg,
-              const std::string& config, std::string& code):
+              const char* config, std::string& code):
     LG(lg), Config(config), Code(code), First(true) {}
   void Start(const char* event)
     {
@@ -72,7 +72,7 @@ public:
     }
 private:
   cmLocalVisualStudio6Generator* LG;
-  std::string Config;
+  const char* Config;
   std::string& Code;
   bool First;
   std::string Event;
@@ -80,7 +80,7 @@ private:
 
 void cmLocalVisualStudio6Generator::AddHelperCommands()
 {
-  std::set<std::string> lang;
+  std::set<cmStdString> lang;
   lang.insert("C");
   lang.insert("CXX");
   this->CreateCustomTargetsAndCommands(lang);
@@ -429,7 +429,7 @@ void cmLocalVisualStudio6Generator
       }
 
     // Add per-source and per-configuration preprocessor definitions.
-    std::map<std::string, std::string> cdmap;
+    std::map<cmStdString, cmStdString> cdmap;
 
       {
       std::set<std::string> targetCompileDefinitions;
@@ -529,7 +529,7 @@ void cmLocalVisualStudio6Generator
             {
             fout << "\n# ADD CPP " << compileFlags << "\n\n";
             }
-          std::map<std::string, std::string>::iterator cdi =
+          std::map<cmStdString, cmStdString>::iterator cdi =
             cdmap.find(cmSystemTools::UpperCase(config));
           if(cdi != cdmap.end() && !cdi->second.empty())
             {
@@ -788,7 +788,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
-                                                    const std::string& config)
+                                                    const char* config)
 {
   cmsys::auto_ptr<cmCustomCommand> pcc;
 
@@ -816,8 +816,8 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
 // look for custom rules on a target and collect them together
 std::string
 cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
-                                                const std::string& configName,
-                                                const char * /* libName */)
+                                                 const char* configName,
+                                                 const char * /* libName */)
 {
   if (target.GetType() >= cmTarget::UTILITY )
     {
@@ -866,7 +866,7 @@ inline std::string removeQuotes(const std::string& s)
 
 std::string
 cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target,
-                                                  const std::string& config)
+                                                       const char *config)
 {
   std::string includeOptions;
 
@@ -1102,7 +1102,7 @@ void cmLocalVisualStudio6Generator
       // Compute the proper name to use to link this library.
       std::string lib;
       std::string libDebug;
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(j->first.c_str());
+      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, j->first.c_str());
       if(tgt)
         {
         lib = cmSystemTools::GetFilenameWithoutExtension
@@ -1707,7 +1707,7 @@ void cmLocalVisualStudio6Generator
       flagsRelWithDebInfo = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelWithDebInfo += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
 
-      this->AddCompileOptions(flags, &target, linkLanguage, "");
+      this->AddCompileOptions(flags, &target, linkLanguage, 0);
       this->AddCompileOptions(flagsDebug, &target, linkLanguage, "Debug");
       this->AddCompileOptions(flagsRelease, &target, linkLanguage, "Release");
       this->AddCompileOptions(flagsMinSizeRel, &target, linkLanguage,
@@ -1733,7 +1733,7 @@ void cmLocalVisualStudio6Generator
     std::set<std::string> minsizeDefinesSet;
     std::set<std::string> debugrelDefinesSet;
 
-    this->AddCompileDefinitions(definesSet, &target, "");
+    this->AddCompileDefinitions(definesSet, &target, 0);
     this->AddCompileDefinitions(debugDefinesSet, &target, "DEBUG");
     this->AddCompileDefinitions(releaseDefinesSet, &target, "RELEASE");
     this->AddCompileDefinitions(minsizeDefinesSet, &target, "MINSIZEREL");

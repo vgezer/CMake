@@ -82,15 +82,15 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
 }
 
 
-bool cmCacheManager::LoadCache(const std::string& path)
+bool cmCacheManager::LoadCache(const char* path)
 {
   return this->LoadCache(path,true);
 }
 
-bool cmCacheManager::LoadCache(const std::string& path,
+bool cmCacheManager::LoadCache(const char* path,
                                bool internal)
 {
-  std::set<std::string> emptySet;
+  std::set<cmStdString> emptySet;
   return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
@@ -178,7 +178,7 @@ bool cmCacheManager::ParseEntry(const char* entry,
   return flag;
 }
 
-void cmCacheManager::CleanCMakeFiles(const std::string& path)
+void cmCacheManager::CleanCMakeFiles(const char* path)
 {
   std::string glob = path;
   glob += cmake::GetCMakeFilesDirectory();
@@ -193,10 +193,10 @@ void cmCacheManager::CleanCMakeFiles(const std::string& path)
     }
 }
 
-bool cmCacheManager::LoadCache(const std::string& path,
+bool cmCacheManager::LoadCache(const char* path,
                                bool internal,
-                               std::set<std::string>& excludes,
-                               std::set<std::string>& includes)
+                               std::set<cmStdString>& excludes,
+                               std::set<cmStdString>& includes)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -428,7 +428,7 @@ bool cmCacheManager::SaveCache(cmMakefile* mf)
 }
 
 
-bool cmCacheManager::SaveCache(const std::string& path)
+bool cmCacheManager::SaveCache(const char* path)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -500,7 +500,7 @@ bool cmCacheManager::SaveCache(const std::string& path)
   fout << "########################\n";
   fout << "\n";
 
-  for( std::map<std::string, CacheEntry>::const_iterator i =
+  for( std::map<cmStdString, CacheEntry>::const_iterator i =
          this->Cache.begin(); i != this->Cache.end(); ++i)
     {
     const CacheEntry& ce = (*i).second;
@@ -578,7 +578,7 @@ bool cmCacheManager::SaveCache(const std::string& path)
   return true;
 }
 
-bool cmCacheManager::DeleteCache(const std::string& path)
+bool cmCacheManager::DeleteCache(const char* path)
 {
   std::string cacheFile = path;
   cmSystemTools::ConvertToUnixSlashes(cacheFile);
@@ -650,7 +650,7 @@ void cmCacheManager::OutputHelpString(std::ostream& fout,
     }
 }
 
-void cmCacheManager::RemoveCacheEntry(const std::string& key)
+void cmCacheManager::RemoveCacheEntry(const char* key)
 {
   CacheEntryMap::iterator i = this->Cache.find(key);
   if(i != this->Cache.end())
@@ -660,8 +660,7 @@ void cmCacheManager::RemoveCacheEntry(const std::string& key)
 }
 
 
-cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(
-    const std::string& key)
+cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(const char* key)
 {
   CacheEntryMap::iterator i = this->Cache.find(key);
   if(i != this->Cache.end())
@@ -677,7 +676,7 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(
   return CacheIterator(*this, key);
 }
 
-const char* cmCacheManager::GetCacheValue(const std::string& key) const
+const char* cmCacheManager::GetCacheValue(const char* key) const
 {
   CacheEntryMap::const_iterator i = this->Cache.find(key);
   if(i != this->Cache.end() &&
@@ -693,7 +692,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;
   out << "CMakeCache Contents:" << std::endl;
-  for(std::map<std::string, CacheEntry>::const_iterator i =
+  for(std::map<cmStdString, CacheEntry>::const_iterator i =
         this->Cache.begin(); i != this->Cache.end(); ++i)
     {
     if((*i).second.Type != INTERNAL)
@@ -709,7 +708,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 }
 
 
-void cmCacheManager::AddCacheEntry(const std::string& key,
+void cmCacheManager::AddCacheEntry(const char* key,
                                    const char* value,
                                    const char* helpString,
                                    CacheEntryType type)
@@ -768,7 +767,7 @@ void cmCacheManager::CacheIterator::Begin()
   this->Position = this->Container.Cache.begin();
 }
 
-bool cmCacheManager::CacheIterator::Find(const std::string& key)
+bool cmCacheManager::CacheIterator::Find(const char* key)
 {
   this->Position = this->Container.Cache.find(key);
   return !this->IsAtEnd();
@@ -808,13 +807,13 @@ bool cmCacheManager::CacheIterator::GetValueAsBool() const
 
 //----------------------------------------------------------------------------
 const char*
-cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
+cmCacheManager::CacheEntry::GetProperty(const char* prop) const
 {
-  if(prop == "TYPE")
+  if(strcmp(prop, "TYPE") == 0)
     {
     return cmCacheManagerTypes[this->Type];
     }
-  else if(prop == "VALUE")
+  else if(strcmp(prop, "VALUE") == 0)
     {
     return this->Value.c_str();
     }
@@ -824,14 +823,14 @@ cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
+void cmCacheManager::CacheEntry::SetProperty(const char* prop,
                                              const char* value)
 {
-  if(prop == "TYPE")
+  if(strcmp(prop, "TYPE") == 0)
     {
     this->Type = cmCacheManager::StringToType(value? value : "STRING");
     }
-  else if(prop == "VALUE")
+  else if(strcmp(prop, "VALUE") == 0)
     {
     this->Value = value? value : "";
     }
@@ -842,15 +841,15 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
+void cmCacheManager::CacheEntry::AppendProperty(const char* prop,
                                                 const char* value,
                                                 bool asString)
 {
-  if(prop == "TYPE")
+  if(strcmp(prop, "TYPE") == 0)
     {
     this->Type = cmCacheManager::StringToType(value? value : "STRING");
     }
-  else if(prop == "VALUE")
+  else if(strcmp(prop, "VALUE") == 0)
     {
     if(value)
       {
@@ -868,8 +867,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
 }
 
 //----------------------------------------------------------------------------
-const char* cmCacheManager::CacheIterator::GetProperty(
-    const std::string& prop) const
+const char* cmCacheManager::CacheIterator::GetProperty(const char* prop) const
 {
   if(!this->IsAtEnd())
     {
@@ -879,8 +877,7 @@ const char* cmCacheManager::CacheIterator::GetProperty(
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
-                                                const char* v)
+void cmCacheManager::CacheIterator::SetProperty(const char* p, const char* v)
 {
   if(!this->IsAtEnd())
     {
@@ -889,7 +886,7 @@ void cmCacheManager::CacheIterator::SetProperty(const std::string& p,
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
+void cmCacheManager::CacheIterator::AppendProperty(const char* p,
                                                    const char* v,
                                                    bool asString)
 {
@@ -900,8 +897,7 @@ void cmCacheManager::CacheIterator::AppendProperty(const std::string& p,
 }
 
 //----------------------------------------------------------------------------
-bool cmCacheManager::CacheIterator::GetPropertyAsBool(
-    const std::string& prop) const
+bool cmCacheManager::CacheIterator::GetPropertyAsBool(const char* prop) const
 {
   if(const char* value = this->GetProperty(prop))
     {
@@ -911,14 +907,13 @@ bool cmCacheManager::CacheIterator::GetPropertyAsBool(
 }
 
 //----------------------------------------------------------------------------
-void cmCacheManager::CacheIterator::SetProperty(const std::string& p, bool v)
+void cmCacheManager::CacheIterator::SetProperty(const char* p, bool v)
 {
   this->SetProperty(p, v ? "ON" : "OFF");
 }
 
 //----------------------------------------------------------------------------
-bool cmCacheManager::CacheIterator::PropertyExists(
-    const std::string& prop) const
+bool cmCacheManager::CacheIterator::PropertyExists(const char* prop) const
 {
   return this->GetProperty(prop)? true:false;
 }

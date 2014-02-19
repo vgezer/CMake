@@ -18,7 +18,7 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
-cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
+cmSourceFile::cmSourceFile(cmMakefile* mf, const char* name):
   Location(mf, name)
 {
   this->CustomCommand = 0;
@@ -153,8 +153,8 @@ bool cmSourceFile::FindFullPath(std::string* error)
     {
     tryDirs[0] = "";
     }
-  const std::set<std::string>& srcExts = mf->GetSourceExtensions();
-  const std::set<std::string>& hdrExts = mf->GetHeaderExtensions();
+  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
+  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
   for(const char* const* di = tryDirs; *di; ++di)
     {
     std::string tryPath = this->Location.GetDirectory();
@@ -164,11 +164,11 @@ bool cmSourceFile::FindFullPath(std::string* error)
       }
     tryPath += this->Location.GetName();
     tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str(), *di);
-    if(this->TryFullPath(tryPath.c_str(), ""))
+    if(this->TryFullPath(tryPath.c_str(), 0))
       {
       return true;
       }
-    for(std::set<std::string>::const_iterator ei = srcExts.begin();
+    for(std::vector<std::string>::const_iterator ei = srcExts.begin();
         ei != srcExts.end(); ++ei)
       {
       if(this->TryFullPath(tryPath.c_str(), ei->c_str()))
@@ -176,7 +176,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
         return true;
         }
       }
-    for(std::set<std::string>::const_iterator ei = hdrExts.begin();
+    for(std::vector<std::string>::const_iterator ei = hdrExts.begin();
         ei != hdrExts.end(); ++ei)
       {
       if(this->TryFullPath(tryPath.c_str(), ei->c_str()))
@@ -194,12 +194,12 @@ bool cmSourceFile::FindFullPath(std::string* error)
     }
   missing += this->Location.GetName();
   e << "Cannot find source file:\n  " << missing << "\nTried extensions";
-  for(std::set<std::string>::const_iterator ext = srcExts.begin();
+  for(std::vector<std::string>::const_iterator ext = srcExts.begin();
       ext != srcExts.end(); ++ext)
     {
     e << " ." << *ext;
     }
-  for(std::set<std::string>::const_iterator ext = hdrExts.begin();
+  for(std::vector<std::string>::const_iterator ext = hdrExts.begin();
       ext != hdrExts.end(); ++ext)
     {
     e << " ." << *ext;
@@ -217,11 +217,10 @@ bool cmSourceFile::FindFullPath(std::string* error)
 }
 
 //----------------------------------------------------------------------------
-bool cmSourceFile::TryFullPath(const std::string& path,
-                               const std::string& ext)
+bool cmSourceFile::TryFullPath(const char* tp, const char* ext)
 {
-  std::string tryPath = path;
-  if(!ext.empty())
+  std::string tryPath = tp;
+  if(ext && *ext)
     {
     tryPath += ".";
     tryPath += ext;
@@ -280,8 +279,13 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFile::SetProperty(const std::string& prop, const char* value)
+void cmSourceFile::SetProperty(const char* prop, const char* value)
 {
+  if (!prop)
+    {
+    return;
+    }
+
   this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
 
   std::string ext =
@@ -289,7 +293,7 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
   if (ext == ".ui")
     {
     cmMakefile const* mf = this->Location.GetMakefile();
-    if (prop == "AUTOUIC_OPTIONS")
+    if (strcmp(prop, "AUTOUIC_OPTIONS") == 0)
       {
       const_cast<cmMakefile*>(mf)->AddQtUiFileWithOptions(this);
       }
@@ -297,15 +301,19 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
+void cmSourceFile::AppendProperty(const char* prop, const char* value,
                                   bool asString)
 {
+  if (!prop)
+    {
+    return;
+    }
   this->Properties.AppendProperty(prop, value, cmProperty::SOURCE_FILE,
                                   asString);
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
+const char* cmSourceFile::GetPropertyForUser(const char *prop)
 {
   // This method is a consequence of design history and backwards
   // compatibility.  GetProperty is (and should be) a const method.
@@ -321,7 +329,7 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
   // cmSourceFileLocation class to commit to a particular full path to
   // the source file as late as possible.  If the users requests the
   // LOCATION property we must commit now.
-  if(prop == "LOCATION")
+  if(strcmp(prop, "LOCATION") == 0)
     {
     // Commit to a location.
     this->GetFullPath();
@@ -332,10 +340,10 @@ const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetProperty(const std::string& prop) const
+const char* cmSourceFile::GetProperty(const char* prop) const
 {
   // Check for computed properties.
-  if(prop == "LOCATION")
+  if(strcmp(prop, "LOCATION") == 0)
     {
     if(this->FullPath.empty())
       {
@@ -360,7 +368,7 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
 }
 
 //----------------------------------------------------------------------------
-bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
+bool cmSourceFile::GetPropertyAsBool(const char* prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }

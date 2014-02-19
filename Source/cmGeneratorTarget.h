@@ -28,8 +28,8 @@ public:
 
   int GetType() const;
   const char *GetName() const;
-  const char *GetProperty(const std::string& prop) const;
-  bool GetPropertyAsBool(const std::string& prop) const;
+  const char *GetProperty(const char *prop) const;
+  bool GetPropertyAsBool(const char *prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   void GetObjectSources(std::vector<cmSourceFile*> &) const;
@@ -52,7 +52,7 @@ public:
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
 
-  std::string GetModuleDefinitionFile() const;
+  std::string ModuleDefinitionFile;
 
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
@@ -61,7 +61,7 @@ public:
 
   void UseObjectLibraries(std::vector<std::string>& objs) const;
 
-  void GetAppleArchs(const std::string& config,
+  void GetAppleArchs(const char* config,
                      std::vector<std::string>& archVec) const;
 
   ///! Return the rule variable used to create this type of target,
@@ -69,14 +69,12 @@ public:
   const char* GetCreateRuleVariable() const;
 
   /** Get the include directories for this target.  */
-  std::vector<std::string> GetIncludeDirectories(
-      const std::string& config) const;
+  std::vector<std::string> GetIncludeDirectories(const char *config) const;
 
-  bool IsSystemIncludeDirectory(const std::string& dir,
-                                const std::string& config) const;
+  bool IsSystemIncludeDirectory(const char *dir, const char *config) const;
 
   /** Add the target output files to the global generator manifest.  */
-  void GenerateTargetManifest(const std::string& config) const;
+  void GenerateTargetManifest(const char* config) const;
 
   /**
    * Trace through the source files in this target and add al source files
@@ -84,71 +82,30 @@ public:
    */
   void TraceDependencies();
 
+  void ClassifySources();
   void LookupObjectLibraries();
 
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
-  /**
-   * Flags for a given source file as used in this target. Typically assigned
-   * via SET_TARGET_PROPERTIES when the property is a list of source files.
-   */
-  enum SourceFileType
-  {
-    SourceFileTypeNormal,
-    SourceFileTypePrivateHeader, // is in "PRIVATE_HEADER" target property
-    SourceFileTypePublicHeader,  // is in "PUBLIC_HEADER" target property
-    SourceFileTypeResource,      // is in "RESOURCE" target property *or*
-                                 // has MACOSX_PACKAGE_LOCATION=="Resources"
-    SourceFileTypeMacContent     // has MACOSX_PACKAGE_LOCATION!="Resources"
-  };
-  struct SourceFileFlags
-  {
-    SourceFileFlags(): Type(SourceFileTypeNormal), MacFolder(0) {}
-    SourceFileFlags(SourceFileFlags const& r):
-      Type(r.Type), MacFolder(r.MacFolder) {}
-    SourceFileType Type;
-    const char* MacFolder; // location inside Mac content folders
-  };
-
-  struct SourceFileFlags
-  GetTargetSourceFileFlags(const cmSourceFile* sf) const;
-
-  struct ResxData {
-    mutable std::set<std::string> ExpectedResxHeaders;
-    mutable std::vector<cmSourceFile*> ResxSources;
-  };
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
-  mutable std::string ModuleDefinitionFile;
 
-  mutable ResxData Resx;
-
-  mutable bool SourceFileFlagsConstructed;
-  mutable bool ObjectSourcesDone;
-  mutable bool IDLSourcesDone;
-  mutable bool ExtraSourcesDone;
-  mutable bool HeaderSourcesDone;
-  mutable bool CustomCommandsDone;
-  mutable bool ExternalObjectsDone;
-  mutable bool ResxDone;
-  mutable bool ModuleDefinitionFileDone;
-  mutable std::vector<cmSourceFile*> CustomCommands;
-  mutable std::vector<cmSourceFile*> ExtraSources;
-  mutable std::vector<cmSourceFile*> HeaderSources;
-  mutable std::vector<cmSourceFile*> ExternalObjects;
-  mutable std::vector<cmSourceFile*> IDLSources;
+  std::vector<cmSourceFile*> CustomCommands;
+  std::vector<cmSourceFile*> ExtraSources;
+  std::vector<cmSourceFile*> HeaderSources;
+  std::vector<cmSourceFile*> ExternalObjects;
+  std::vector<cmSourceFile*> IDLSources;
+  std::vector<cmSourceFile*> ResxSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
-  mutable std::vector<cmSourceFile*> ObjectSources;
+  std::set<std::string> ExpectedResxHeaders;
+  std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
-
-  void ConstructSourceFileFlags() const;
-  mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);

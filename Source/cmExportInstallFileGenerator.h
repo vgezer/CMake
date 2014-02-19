@@ -41,7 +41,7 @@ public:
   /** Get the per-config file generated for each configuraiton.  This
       maps from the configuration name to the file temporary location
       for installation.  */
-  std::map<std::string, std::string> const& GetConfigImportFiles()
+  std::map<cmStdString, cmStdString> const& GetConfigImportFiles()
     { return this->ConfigImportFiles; }
 
   /** Compute the globbing expression used to load per-config import
@@ -52,7 +52,7 @@ protected:
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);
   virtual void GenerateImportTargetsConfig(std::ostream& os,
-                                           const std::string& config,
+                                           const char* config,
                                            std::string const& suffix,
                             std::vector<std::string> &missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
@@ -72,11 +72,11 @@ protected:
 
 
   /** Generate a per-configuration file for the targets.  */
-  bool GenerateImportFileConfig(const std::string& config,
+  bool GenerateImportFileConfig(const char* config,
                             std::vector<std::string> &missingTargets);
 
   /** Fill in properties indicating installed file locations.  */
-  void SetImportLocationProperty(const std::string& config,
+  void SetImportLocationProperty(const char* config,
                                  std::string const& suffix,
                                  cmInstallTargetGenerator* itgen,
                                  ImportPropertyMap& properties,
@@ -92,7 +92,7 @@ protected:
   std::string ImportPrefix;
 
   // The import file generated for each configuration.
-  std::map<std::string, std::string> ConfigImportFiles;
+  std::map<cmStdString, cmStdString> ConfigImportFiles;
 };
 
 #endif

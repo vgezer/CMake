@@ -68,8 +68,7 @@ private:
   bool DebugMode;
 
   // Configuration information.
-  bool HasConfig;
-  std::string Config;
+  const char* Config;
   cmTarget::LinkLibraryType LinkType;
 
   // Output information.
@@ -77,7 +76,7 @@ private:
 
   typedef cmTarget::LinkLibraryVectorType LinkLibraryVectorType;
 
-  std::map<std::string, int>::iterator
+  std::map<cmStdString, int>::iterator
   AllocateLinkEntry(std::string const& item);
   int AddLinkEntry(int depender_index, std::string const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
@@ -88,7 +87,7 @@ private:
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
-  std::map<std::string, int> LinkEntryIndex;
+  std::map<cmStdString, int> LinkEntryIndex;
 
   // BFS of initial dependencies.
   struct BFSEntry

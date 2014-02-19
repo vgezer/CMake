@@ -38,7 +38,7 @@ bool cmIncludeDirectoryCommand
 
   std::vector<std::string> beforeIncludes;
   std::vector<std::string> afterIncludes;
-  std::set<std::string> systemIncludes;
+  std::set<cmStdString> systemIncludes;
 
   for(; i != args.end(); ++i)
     {

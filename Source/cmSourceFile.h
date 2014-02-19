@@ -31,7 +31,7 @@ public:
    * Construct with the makefile storing the source and the initial
    * name referencing it.
    */
-  cmSourceFile(cmMakefile* mf, const std::string& name);
+  cmSourceFile(cmMakefile* mf, const char* name);
 
   ~cmSourceFile();
 
@@ -43,15 +43,14 @@ public:
   void SetCustomCommand(cmCustomCommand *cc);
 
   ///! Set/Get a property of this source file
-  void SetProperty(const std::string& prop, const char *value);
-  void AppendProperty(const std::string& prop,
-                      const char* value,bool asString=false);
-  const char *GetProperty(const std::string& prop) const;
-  bool GetPropertyAsBool(const std::string& prop) const;
+  void SetProperty(const char *prop, const char *value);
+  void AppendProperty(const char* prop, const char* value,bool asString=false);
+  const char *GetProperty(const char *prop) const;
+  bool GetPropertyAsBool(const char *prop) const;
 
   /** Implement getting a property when called from a CMake language
       command like get_property or get_source_file_property.  */
-  const char* GetPropertyForUser(const std::string& prop);
+  const char* GetPropertyForUser(const char *prop);
 
   /**
    * The full path to the file.  The non-const version of this method
@@ -107,7 +106,7 @@ private:
   bool FindFullPathFailed;
 
   bool FindFullPath(std::string* error);
-  bool TryFullPath(const std::string& path, const std::string& ext);
+  bool TryFullPath(const char* tryPath, const char* ext);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 

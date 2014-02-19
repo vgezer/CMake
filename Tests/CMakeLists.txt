@@ -208,9 +208,9 @@ if(BUILD_TESTING)
   endif()
   ADD_TEST_MACRO(Simple Simple)
   ADD_TEST_MACRO(PreOrder PreOrder)
-#   ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
-#   set_tests_properties(MissingSourceFile PROPERTIES
-#     PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
+  ADD_TEST_MACRO(MissingSourceFile MissingSourceFile)
+  set_tests_properties(MissingSourceFile PROPERTIES
+    PASS_REGULAR_EXPRESSION "CMake Error at CMakeLists.txt:3 \\(add_executable\\):[ \r\n]*Cannot find source file:[ \r\n]*DoesNotExist/MissingSourceFile.c")
   if(CMAKE_Fortran_COMPILER)
     ADD_TEST_MACRO(FortranOnly FortranOnly)
   endif()

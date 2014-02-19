@@ -155,7 +155,7 @@ cmGlobalVisualStudio71Generator
 // the libraries it uses are also done here
 void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
-                                              const std::string& dspname,
+                                              const char* dspname,
                                               const char* dir,
                                               cmTarget const& t)
 {
@@ -208,7 +208,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 void
 cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
-                      const std::string&,
+                      const char*,
                       const char*, cmTarget const& target)
 {
   VSDependSet const& depends = this->VSTargetDepends[&target];
@@ -234,10 +234,10 @@ cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteExternalProject(std::ostream& fout,
-                       const std::string& name,
+                       const char* name,
                        const char* location,
                        const char* typeGuid,
-                       const std::set<std::string>& depends)
+                       const std::set<cmStdString>& depends)
 {
   fout << "Project(\"{"
        << (typeGuid ? typeGuid : this->ExternalProjectType(location))
@@ -252,7 +252,7 @@ void cmGlobalVisualStudio71Generator
   if(!depends.empty())
     {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-    std::set<std::string>::const_iterator it;
+    std::set<cmStdString>::const_iterator it;
     for(it = depends.begin(); it != depends.end(); ++it)
       {
       if(it->size() > 0)
@@ -277,7 +277,7 @@ void cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmTarget::TargetType,
+  std::ostream& fout, const char* name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {

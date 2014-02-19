@@ -55,8 +55,8 @@ public:
   const cmake* GetCMakeInstance() const;
   cmake* GetCMakeInstance();
 
-  std::string const& GetConfigName() const
-  { return this->ConfigName; }
+  const char* GetConfigName() const
+  { return this->ConfigName.c_str(); }
 
   /// @return whether we are processing the top CMakeLists.txt file.
   bool isRootMakefile() const;

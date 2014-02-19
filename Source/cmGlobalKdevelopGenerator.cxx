@@ -44,7 +44,7 @@ void cmGlobalKdevelopGenerator::Generate()
 {
   // for each sub project in the project create
   // a kdevelop project
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)
@@ -76,7 +76,7 @@ void cmGlobalKdevelopGenerator::Generate()
         {
         if (ti->second.GetType()==cmTarget::EXECUTABLE)
           {
-          executable = ti->second.GetLocation("");
+          executable = ti->second.GetLocation(0);
           break;
           }
         }
@@ -103,7 +103,7 @@ bool cmGlobalKdevelopGenerator
   std::string projectDir = projectDirIn + "/";
   std::string filename = outputDir+ "/" + projectname +".kdevelop.filelist";
 
-  std::set<std::string> files;
+  std::set<cmStdString> files;
   std::string tmp;
 
   for (std::vector<cmLocalGenerator*>::const_iterator it=lgs.begin();
@@ -158,7 +158,7 @@ bool cmGlobalKdevelopGenerator
           files.insert(tmp);
 
           // check if there's a matching header around
-          for(std::set<std::string>::const_iterator
+          for(std::vector<std::string>::const_iterator
                 ext = makefile->GetHeaderExtensions().begin();
               ext !=  makefile->GetHeaderExtensions().end(); ++ext)
             {
@@ -217,7 +217,7 @@ bool cmGlobalKdevelopGenerator
     }
 
   fileToOpen="";
-  for (std::set<std::string>::const_iterator it=files.begin();
+  for (std::set<cmStdString>::const_iterator it=files.begin();
        it!=files.end(); it++)
     {
     // get the full path to the file

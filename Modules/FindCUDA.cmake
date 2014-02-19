@@ -987,7 +987,7 @@ function(CUDA_COMPUTE_BUILD_PATH path build_path)
     endif()
   endif()
 
-  # This recipe is from cmLocalGenerator::CreateSafeUniqueObjectFileName in the
+  # This recipie is from cmLocalGenerator::CreateSafeUniqueObjectFileName in the
   # CMake source.
 
   # Remove leading /

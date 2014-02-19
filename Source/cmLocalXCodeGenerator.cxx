@@ -37,7 +37,7 @@ cmLocalXCodeGenerator::GetTargetDirectory(cmTarget const&) const
 
 //----------------------------------------------------------------------------
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
-                                             const std::string& rawFlag)
+                                             const char* rawFlag)
 {
   cmGlobalXCodeGenerator* gg =
     static_cast<cmGlobalXCodeGenerator*>(this->GlobalGenerator);
@@ -54,7 +54,7 @@ void cmLocalXCodeGenerator::Generate()
       iter != targets.end(); ++iter)
     {
     cmTarget* t = &iter->second;
-    t->HasMacOSXRpathInstallNameDir("");
+    t->HasMacOSXRpathInstallNameDir(NULL);
     }
 }
 
@@ -68,6 +68,6 @@ void cmLocalXCodeGenerator::GenerateInstallRules()
       iter != targets.end(); ++iter)
     {
     cmTarget* t = &iter->second;
-    t->HasMacOSXRpathInstallNameDir("");
+    t->HasMacOSXRpathInstallNameDir(NULL);
     }
 }

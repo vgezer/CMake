@@ -30,8 +30,12 @@ cmCTestGenericHandler::~cmCTestGenericHandler()
 }
 
 //----------------------------------------------------------------------
-void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
+void cmCTestGenericHandler::SetOption(const char* op, const char* value)
 {
+  if ( !op )
+    {
+    return;
+    }
   if ( !value )
     {
     cmCTestGenericHandler::t_StringToString::iterator remit
@@ -47,10 +51,14 @@ void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
 }
 
 //----------------------------------------------------------------------
-void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
+void cmCTestGenericHandler::SetPersistentOption(const char* op,
                                                 const char* value)
 {
   this->SetOption(op, value);
+  if ( !op )
+    {
+    return;
+    }
   if ( !value )
     {
     cmCTestGenericHandler::t_StringToString::iterator remit
@@ -80,7 +88,7 @@ void cmCTestGenericHandler::Initialize()
 }
 
 //----------------------------------------------------------------------
-const char* cmCTestGenericHandler::GetOption(const std::string& op)
+const char* cmCTestGenericHandler::GetOption(const char* op)
 {
   cmCTestGenericHandler::t_StringToString::iterator remit
     = this->Options.find(op);

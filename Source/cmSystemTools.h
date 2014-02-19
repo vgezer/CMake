@@ -47,7 +47,7 @@ public:
                                    KeyWOW64 view = KeyWOW64_Default);
 
   ///! Escape quotes in a string.
-  static std::string EscapeQuotes(const std::string& str);
+  static std::string EscapeQuotes(const char* str);
 
   /** Map help document name to file name.  */
   static std::string HelpFileName(std::string);
@@ -158,10 +158,9 @@ public:
   static std::string FileExistsInParentDirectories(const char* fname,
     const char* directory, const char* toplevel);
 
-  static void Glob(const std::string& directory, const std::string& regexp,
+  static void Glob(const char *directory, const char *regexp,
                    std::vector<std::string>& files);
-  static void GlobDirs(const std::string& fullPath,
-                       std::vector<std::string>& files);
+  static void GlobDirs(const char *fullPath, std::vector<std::string>& files);
 
   /**
    * Try to find a list of files that match the "simple" globbing
@@ -172,8 +171,8 @@ public:
    * want to find. 0 means all files, -1 means directories, 1 means
    * files only. This method returns true if search was succesfull.
    */
-  static bool SimpleGlob(const std::string& glob,
-                         std::vector<std::string>& files,
+  static bool SimpleGlob(const cmStdString& glob,
+                         std::vector<cmStdString>& files,
                          int type = 0);
 
   ///! Copy a file.
@@ -186,10 +185,10 @@ public:
   static bool RenameFile(const char* oldname, const char* newname);
 
   ///! Compute the md5sum of a file
-  static bool ComputeFileMD5(const std::string& source, char* md5out);
+  static bool ComputeFileMD5(const char* source, char* md5out);
 
   /** Compute the md5sum of a string.  */
-  static std::string ComputeStringMD5(const std::string& input);
+  static std::string ComputeStringMD5(const char* input);
 
   /**
    * Run a single executable command
@@ -234,13 +233,18 @@ public:
                                int* retVal = 0, const char* dir = 0,
                                OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0);
+  static bool RunSingleCommand(std::vector<cmStdString> const& command,
+                               std::string* output = 0,
+                               int* retVal = 0, const char* dir = 0,
+                               OutputOption outputflag = OUTPUT_MERGE,
+                               double timeout = 0.0);
 
   static std::string PrintSingleCommand(std::vector<std::string> const&);
 
   /**
    * Parse arguments out of a single string command
    */
-  static std::vector<std::string> ParseArguments(const char* command);
+  static std::vector<cmStdString> ParseArguments(const char* command);
 
   /** Parse arguments out of a windows command line string.  */
   static void ParseWindowsCommandLine(const char* command,
@@ -249,6 +253,8 @@ public:
   /** Parse arguments out of a unix command line string.  */
   static void ParseUnixCommandLine(const char* command,
                                    std::vector<std::string>& args);
+  static void ParseUnixCommandLine(const char* command,
+                                   std::vector<cmStdString>& args);
 
   /** Compute an escaped version of the given argument for use in a
       windows shell.  See kwsys/System.h.in for details.  */
@@ -314,7 +320,7 @@ public:
 
   /** Split a string on its newlines into multiple lines.  Returns
       false only if the last line stored had no newline.  */
-  static bool Split(const char* s, std::vector<std::string>& l);
+  static bool Split(const char* s, std::vector<cmStdString>& l);
   static void SetForceUnixPaths(bool v)
     {
       s_ForceUnixPaths = v;
@@ -383,7 +389,7 @@ public:
   static bool ListTar(const char* outFileName,
                       bool gzip, bool verbose);
   static bool CreateTar(const char* outFileName,
-                        const std::vector<std::string>& files, bool gzip,
+                        const std::vector<cmStdString>& files, bool gzip,
                         bool bzip2, bool verbose);
   static bool ExtractTar(const char* inFileName, bool gzip,
                          bool verbose);

@@ -179,11 +179,10 @@ void cmSystemTools::ExpandRegistryValues(std::string& source, KeyWOW64)
 }
 #endif
 
-std::string cmSystemTools::EscapeQuotes(const std::string& str)
+std::string cmSystemTools::EscapeQuotes(const char* str)
 {
-  std::string result;
-  result.reserve(str.size());
-  for(const char* ch = str.c_str(); *ch != '\0'; ++ch)
+  std::string result = "";
+  for(const char* ch = str; *ch != '\0'; ++ch)
     {
     if(*ch == '"')
       {
@@ -477,11 +476,27 @@ public:
       args.push_back(*arg);
       }
     }
+  void Store(std::vector<cmStdString>& args) const
+    {
+    for(char** arg = this->ArgV; arg && *arg; ++arg)
+      {
+      args.push_back(*arg);
+      }
+    }
 };
 
 //----------------------------------------------------------------------------
 void cmSystemTools::ParseUnixCommandLine(const char* command,
                                          std::vector<std::string>& args)
+{
+  // Invoke the underlying parser.
+  cmSystemToolsArgV argv = cmsysSystem_Parse_CommandForUnix(command, 0);
+  argv.Store(args);
+}
+
+//----------------------------------------------------------------------------
+void cmSystemTools::ParseUnixCommandLine(const char* command,
+                                         std::vector<cmStdString>& args)
 {
   // Invoke the underlying parser.
   cmSystemToolsArgV argv = cmsysSystem_Parse_CommandForUnix(command, 0);
@@ -507,9 +522,9 @@ std::string cmSystemTools::EscapeWindowsShellArgument(const char* arg,
   return result;
 }
 
-std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
+std::vector<cmStdString> cmSystemTools::ParseArguments(const char* command)
 {
-  std::vector<std::string> args;
+  std::vector<cmStdString> args;
   std::string arg;
 
   bool win_path = false;
@@ -589,6 +604,22 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
   return args;
 }
 
+
+bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
+                                     std::string* output ,
+                                     int* retVal , const char* dir ,
+                                     OutputOption outputflag ,
+                                     double timeout )
+{
+  std::vector<std::string> cmd;
+  for(std::vector<cmStdString>::const_iterator i = command.begin();
+      i != command.end(); ++i)
+    {
+    cmd.push_back(*i);
+    }
+  return cmSystemTools::RunSingleCommand(cmd, output, retVal, dir,
+                                         outputflag, timeout);
+}
 
 bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
                                      std::string* output ,
@@ -749,7 +780,7 @@ bool cmSystemTools::RunSingleCommand(
     outputflag = OUTPUT_NONE;
     }
 
-  std::vector<std::string> args = cmSystemTools::ParseArguments(command);
+  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
 
   if(args.size() < 1)
     {
@@ -913,7 +944,7 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 #endif
 }
 
-bool cmSystemTools::ComputeFileMD5(const std::string& source, char* md5out)
+bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmCryptoHashMD5 md5;
@@ -928,7 +959,7 @@ bool cmSystemTools::ComputeFileMD5(const std::string& source, char* md5out)
 #endif
 }
 
-std::string cmSystemTools::ComputeStringMD5(const std::string& input)
+std::string cmSystemTools::ComputeStringMD5(const char* input)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmCryptoHashMD5 md5;
@@ -940,14 +971,13 @@ std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 #endif
 }
 
-void cmSystemTools::Glob(const std::string& directory,
-                         const std::string& regexp,
+void cmSystemTools::Glob(const char *directory, const char *regexp,
                          std::vector<std::string>& files)
 {
   cmsys::Directory d;
-  cmsys::RegularExpression reg(regexp.c_str());
+  cmsys::RegularExpression reg(regexp);
 
-  if (d.Load(directory.c_str()))
+  if (d.Load(directory))
     {
     size_t numf;
         unsigned int i;
@@ -964,13 +994,14 @@ void cmSystemTools::Glob(const std::string& directory,
 }
 
 
-void cmSystemTools::GlobDirs(const std::string& path,
+void cmSystemTools::GlobDirs(const char *fullPath,
                              std::vector<std::string>& files)
 {
+  std::string path = fullPath;
   std::string::size_type pos = path.find("/*");
   if(pos == std::string::npos)
     {
-    files.push_back(path);
+    files.push_back(fullPath);
     return;
     }
   std::string startPath = path.substr(0, pos);
@@ -1097,8 +1128,8 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
     }
 }
 
-bool cmSystemTools::SimpleGlob(const std::string& glob,
-                               std::vector<std::string>& files,
+bool cmSystemTools::SimpleGlob(const cmStdString& glob,
+                               std::vector<cmStdString>& files,
                                int type /* = 0 */)
 {
   files.clear();
@@ -1216,7 +1247,7 @@ cmSystemTools::FileFormat cmSystemTools::GetFileFormat(const char* cext)
   return cmSystemTools::UNKNOWN_FILE_FORMAT;
 }
 
-bool cmSystemTools::Split(const char* s, std::vector<std::string>& l)
+bool cmSystemTools::Split(const char* s, std::vector<cmStdString>& l)
 {
   std::vector<std::string> temp;
   bool res = Superclass::Split(s, temp);
@@ -1428,7 +1459,7 @@ bool cmSystemTools::IsPathToFramework(const char* path)
 }
 
 bool cmSystemTools::CreateTar(const char* outFileName,
-                              const std::vector<std::string>& files,
+                              const std::vector<cmStdString>& files,
                               bool gzip, bool bzip2, bool verbose)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1448,7 +1479,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
                            cmArchiveWrite::CompressNone)),
                            cmArchiveWrite::TypeTAR);
   a.SetVerbose(verbose);
-  for(std::vector<std::string>::const_iterator i = files.begin();
+  for(std::vector<cmStdString>::const_iterator i = files.begin();
       i != files.end(); ++i)
     {
     std::string path = *i;
@@ -2300,7 +2331,7 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
                                        std::string& soname)
 {
-  std::vector<std::string> cmds;
+  std::vector<cmStdString> cmds;
   cmds.push_back("otool");
   cmds.push_back("-D");
   cmds.push_back(fullPath.c_str());
