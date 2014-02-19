@@ -477,9 +477,9 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetName(const std::string& name)
+void cmDocumentation::SetName(const char* name)
 {
-  this->NameString = name;
+  this->NameString = name?name:"";
 }
 
 //----------------------------------------------------------------------------

@@ -624,7 +624,7 @@ void cmGlobalUnixMakefileGenerator3
 void
 cmGlobalUnixMakefileGenerator3
 ::WriteConvenienceRules(std::ostream& ruleFileStream,
-                        std::set<std::string> &emitted)
+                        std::set<cmStdString> &emitted)
 {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
@@ -1051,7 +1051,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
   lg->AppendEcho(commands,"... depend");
 
   // Keep track of targets already listed.
-  std::set<std::string> emittedTargets;
+  std::set<cmStdString> emittedTargets;
 
   // for each local generator
   unsigned int i;
@@ -1086,8 +1086,8 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
         }
       }
     }
-  std::vector<std::string> const& localHelp = lg->GetLocalHelp();
-  for(std::vector<std::string>::const_iterator o = localHelp.begin();
+  std::vector<cmStdString> const& localHelp = lg->GetLocalHelp();
+  for(std::vector<cmStdString>::const_iterator o = localHelp.begin();
       o != localHelp.end(); ++o)
     {
     path = "... ";
@@ -1104,9 +1104,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
 bool cmGlobalUnixMakefileGenerator3
 ::NeedRequiresStep(cmTarget const& target)
 {
-  std::set<std::string> languages;
+  std::set<cmStdString> languages;
   target.GetLanguages(languages);
-  for(std::set<std::string>::const_iterator l = languages.begin();
+  for(std::set<cmStdString>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
     std::string var = "CMAKE_NEEDS_REQUIRES_STEP_";

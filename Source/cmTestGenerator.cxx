@@ -64,7 +64,7 @@ void cmTestGenerator::GenerateScriptActions(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
-                                              const std::string& config,
+                                              const char* config,
                                               Indent const& indent)
 {
   this->TestGenerated = true;

@@ -338,7 +338,7 @@ void cmGlobalVisualStudio8Generator::Generate()
   if(this->AddCheckTarget())
     {
     // All targets depend on the build-system check target.
-    for(std::map<std::string,cmTarget *>::const_iterator
+    for(std::map<cmStdString,cmTarget *>::const_iterator
           ti = this->TotalTargets.begin();
         ti != this->TotalTargets.end(); ++ti)
       {
@@ -372,7 +372,7 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+  std::ostream& fout, const char* name, cmTarget::TargetType type,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {
@@ -436,11 +436,11 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmTarget& target)
 {
   // Look for utility dependencies that magically link.
-  for(std::set<std::string>::const_iterator ui =
+  for(std::set<cmStdString>::const_iterator ui =
         target.GetUtilities().begin();
       ui != target.GetUtilities().end(); ++ui)
     {
-    if(cmTarget* depTarget = this->FindTarget(ui->c_str()))
+    if(cmTarget* depTarget = this->FindTarget(0, ui->c_str()))
       {
       if(depTarget->GetType() != cmTarget::INTERFACE_LIBRARY
           && depTarget->GetProperty("EXTERNAL_MSPROJECT"))

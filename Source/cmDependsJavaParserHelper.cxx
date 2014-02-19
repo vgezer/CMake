@@ -36,10 +36,10 @@ cmDependsJavaParserHelper::~cmDependsJavaParserHelper()
 }
 
 void cmDependsJavaParserHelper::CurrentClass
-::AddFileNamesForPrinting(std::vector<std::string> *files,
+::AddFileNamesForPrinting(std::vector<cmStdString> *files,
                           const char* prefix, const char* sep)
 {
-  std::string rname = "";
+  cmStdString rname = "";
   if ( prefix )
     {
     rname += prefix;
@@ -76,7 +76,7 @@ void cmDependsJavaParserHelper::AddClassFound(const char* sclass)
     {
     return;
     }
-  std::vector<std::string>::iterator it;
+  std::vector<cmStdString>::iterator it;
   for ( it = this->ClassesFound.begin();
     it != this->ClassesFound.end();
     it ++ )
@@ -91,7 +91,7 @@ void cmDependsJavaParserHelper::AddClassFound(const char* sclass)
 
 void cmDependsJavaParserHelper::AddPackagesImport(const char* sclass)
 {
-  std::vector<std::string>::iterator it;
+  std::vector<cmStdString>::iterator it;
   for ( it = this->PackagesImport.begin();
     it != this->PackagesImport.end();
     it ++ )
@@ -256,8 +256,8 @@ void cmDependsJavaParserHelper::PrintClasses()
     std::cerr << "Error when parsing. No classes on class stack" << std::endl;
     abort();
     }
-  std::vector<std::string> files = this->GetFilesProduced();
-  std::vector<std::string>::iterator sit;
+  std::vector<cmStdString> files = this->GetFilesProduced();
+  std::vector<cmStdString>::iterator sit;
   for ( sit = files.begin();
     sit != files.end();
     ++ sit )
@@ -266,9 +266,9 @@ void cmDependsJavaParserHelper::PrintClasses()
     }
 }
 
-std::vector<std::string> cmDependsJavaParserHelper::GetFilesProduced()
+std::vector<cmStdString> cmDependsJavaParserHelper::GetFilesProduced()
 {
-  std::vector<std::string> files;
+  std::vector<cmStdString> files;
   CurrentClass* toplevel = &(*(this->ClassStack.begin()));
   std::vector<CurrentClass>::iterator it;
   for ( it = toplevel->NestedClasses->begin();
@@ -313,7 +313,7 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
     std::cout << "Imports packages:";
     if ( this->PackagesImport.size() > 0 )
       {
-      std::vector<std::string>::iterator it;
+      std::vector<cmStdString>::iterator it;
       for ( it = this->PackagesImport.begin();
         it != this->PackagesImport.end();
         ++ it )
@@ -325,7 +325,7 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
     std::cout << "Depends on:";
     if ( this->ClassesFound.size() > 0 )
       {
-      std::vector<std::string>::iterator it;
+      std::vector<cmStdString>::iterator it;
       for ( it = this->ClassesFound.begin();
         it != this->ClassesFound.end();
         ++ it )
@@ -419,8 +419,8 @@ int cmDependsJavaParserHelper::ParseFile(const char* file)
     return 0;
     }
 
-  std::string fullfile = "";
-  std::string line;
+  cmStdString fullfile = "";
+  cmStdString line;
   while ( cmSystemTools::GetLineFromStream(ifs, line) )
     {
     fullfile += line + "\n";

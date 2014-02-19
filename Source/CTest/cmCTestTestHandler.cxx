@@ -540,8 +540,8 @@ int cmCTestTestHandler::ProcessHandler()
   this->StartLogFile((this->MemCheck ? "DynamicAnalysis" : "Test"), mLogFile);
   this->LogFile = &mLogFile;
 
-  std::vector<std::string> passed;
-  std::vector<std::string> failed;
+  std::vector<cmStdString> passed;
+  std::vector<cmStdString> failed;
   int total;
 
   //start the real time clock
@@ -569,7 +569,7 @@ int cmCTestTestHandler::ProcessHandler()
       {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
         << "The following tests passed:" << std::endl);
-      for(std::vector<std::string>::iterator j = passed.begin();
+      for(std::vector<cmStdString>::iterator j = passed.begin();
           j != passed.end(); ++j)
         {
         cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "\t" << *j
@@ -661,8 +661,8 @@ void cmCTestTestHandler::PrintLabelSummary()
   cmCTestTestHandler::ListOfTests::iterator it = this->TestList.begin();
   cmCTestTestHandler::TestResultsVector::iterator ri =
     this->TestResults.begin();
-  std::map<std::string, double> labelTimes;
-  std::set<std::string> labels;
+  std::map<cmStdString, double> labelTimes;
+  std::set<cmStdString> labels;
   // initialize maps
   std::string::size_type maxlen = 0;
   for(; it != this->TestList.end(); ++it)
@@ -702,7 +702,7 @@ void cmCTestTestHandler::PrintLabelSummary()
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "\nLabel Time Summary:");
     }
-  for(std::set<std::string>::const_iterator i = labels.begin();
+  for(std::set<cmStdString>::const_iterator i = labels.begin();
       i != labels.end(); ++i)
     {
     std::string label = *i;
@@ -1050,8 +1050,8 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 }
 
 //---------------------------------------------------------------------
-void cmCTestTestHandler::ProcessDirectory(std::vector<std::string> &passed,
-                                         std::vector<std::string> &failed)
+void cmCTestTestHandler::ProcessDirectory(std::vector<cmStdString> &passed,
+                                         std::vector<cmStdString> &failed)
 {
   this->ComputeTestList();
   this->StartTest = this->CTest->CurrentTime();
@@ -1216,7 +1216,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       << "name=\"Command Line\"><Value>"
       << cmXMLSafe(result->FullCommandLine)
       << "</Value></NamedMeasurement>\n";
-    std::map<std::string,std::string>::iterator measureIt;
+    std::map<cmStdString,cmStdString>::iterator measureIt;
     for ( measureIt = result->Properties->Measurements.begin();
       measureIt != result->Properties->Measurements.end();
       ++ measureIt )
@@ -1328,9 +1328,9 @@ void cmCTestTestHandler::AttachFiles(std::ostream& os,
 }
 
 //----------------------------------------------------------------------
-int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
+int cmCTestTestHandler::ExecuteCommands(std::vector<cmStdString>& vec)
 {
-  std::vector<std::string>::iterator it;
+  std::vector<cmStdString>::iterator it;
   for ( it = vec.begin(); it != vec.end(); ++it )
     {
     int retVal = 0;
@@ -2112,7 +2112,7 @@ bool cmCTestTestHandler::SetTestsProperties(
   const std::vector<std::string>& args)
 {
   std::vector<std::string>::const_iterator it;
-  std::vector<std::string> tests;
+  std::vector<cmStdString> tests;
   bool found = false;
   for ( it = args.begin(); it != args.end(); ++ it )
     {
@@ -2137,7 +2137,7 @@ bool cmCTestTestHandler::SetTestsProperties(
       break;
       }
     std::string val = *it;
-    std::vector<std::string>::const_iterator tit;
+    std::vector<cmStdString>::const_iterator tit;
     for ( tit = tests.begin(); tit != tests.end(); ++ tit )
       {
       cmCTestTestHandler::ListOfTests::iterator rtit;
@@ -2319,7 +2319,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
     }
   if ( this->MemCheck )
     {
-    std::vector<std::string>::iterator it;
+    std::vector<cmStdString>::iterator it;
     bool found = false;
     for ( it = this->CustomTestsIgnore.begin();
       it != this->CustomTestsIgnore.end(); ++ it )
@@ -2339,7 +2339,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
     }
   else
     {
-    std::vector<std::string>::iterator it;
+    std::vector<cmStdString>::iterator it;
     bool found = false;
     for ( it = this->CustomTestsIgnore.begin();
       it != this->CustomTestsIgnore.end(); ++ it )

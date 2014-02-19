@@ -73,7 +73,7 @@ private:
   bool HaveErr;
 
   // Labels associated with the build rule.
-  std::set<std::string> Labels;
+  std::set<cmStdString> Labels;
   void LoadLabels();
   bool SourceMatches(std::string const& lhs,
                      std::string const& rhs);

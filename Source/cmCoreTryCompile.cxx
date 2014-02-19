@@ -564,7 +564,7 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
   cmsys::Directory dir;
   dir.Load(binDir);
   size_t fileNum;
-  std::set<std::string> deletedFiles;
+  std::set<cmStdString> deletedFiles;
   for (fileNum = 0; fileNum <  dir.GetNumberOfFiles(); ++fileNum)
     {
     if (strcmp(dir.GetFile(static_cast<unsigned long>(fileNum)),".") &&

@@ -56,27 +56,26 @@ public:
   void SetExportOld(bool exportOld) { this->ExportOld = exportOld; }
 
   /** Add a configuration to be exported.  */
-  void AddConfiguration(const std::string& config);
+  void AddConfiguration(const char* config);
 
   /** Actually generate the export file.  Returns whether there was an
       error.  */
   bool GenerateImportFile();
 protected:
 
-  typedef std::map<std::string, std::string> ImportPropertyMap;
+  typedef std::map<cmStdString, cmStdString> ImportPropertyMap;
 
   // Generate per-configuration target information to the given output
   // stream.
-  void GenerateImportConfig(std::ostream& os, const std::string& config,
+  void GenerateImportConfig(std::ostream& os, const char* config,
                             std::vector<std::string> &missingTargets);
 
   // Methods to implement export file code generation.
-  void GenerateImportHeaderCode(std::ostream& os,
-                                const std::string& config = "");
+  void GenerateImportHeaderCode(std::ostream& os, const char* config = 0);
   void GenerateImportFooterCode(std::ostream& os);
   void GenerateImportVersionCode(std::ostream& os);
   void GenerateImportTargetCode(std::ostream& os, cmTarget const* target);
-  void GenerateImportPropertyCode(std::ostream& os, const std::string& config,
+  void GenerateImportPropertyCode(std::ostream& os, const char* config,
                                   cmTarget const* target,
                                   ImportPropertyMap const& properties);
   void GenerateImportedFileChecksCode(std::ostream& os, cmTarget* target,
@@ -91,12 +90,12 @@ protected:
 
   // Collect properties with detailed information about targets beyond
   // their location on disk.
-  void SetImportDetailProperties(const std::string& config,
+  void SetImportDetailProperties(const char* config,
                                  std::string const& suffix, cmTarget* target,
                                  ImportPropertyMap& properties,
                                  std::vector<std::string>& missingTargets);
   void SetImportLinkProperty(std::string const& suffix,
-                             cmTarget* target, const std::string& propName,
+                             cmTarget* target, const char* propName,
                              std::vector<std::string> const& entries,
                              ImportPropertyMap& properties,
                              std::vector<std::string>& missingTargets);
@@ -106,7 +105,7 @@ protected:
 
   /** Each subclass knows where the target files are located.  */
   virtual void GenerateImportTargetsConfig(std::ostream& os,
-                                           const std::string& config,
+                                           const char* config,
                                            std::string const& suffix,
                             std::vector<std::string> &missingTargets) = 0;
 
@@ -117,7 +116,7 @@ protected:
                                    cmMakefile* mf,
                                    cmTarget* depender,
                                    cmTarget* dependee) = 0;
-  void PopulateInterfaceProperty(const std::string&,
+  void PopulateInterfaceProperty(const char *,
                                  cmTarget *target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
@@ -126,7 +125,7 @@ protected:
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
                                  std::vector<std::string> &missingTargets);
-  void PopulateInterfaceProperty(const std::string& propName, cmTarget *target,
+  void PopulateInterfaceProperty(const char *propName, cmTarget *target,
                                  ImportPropertyMap &properties);
   void PopulateCompatibleInterfaceProperties(cmTarget *target,
                                  ImportPropertyMap &properties);
@@ -138,8 +137,7 @@ protected:
                       ImportPropertyMap &properties,
                       std::vector<std::string> &missingTargets);
 
-  void SetImportLinkInterface(const std::string& config,
-                    std::string const& suffix,
+  void SetImportLinkInterface(const char* config, std::string const& suffix,
                     cmGeneratorExpression::PreprocessContext preprocessRule,
                     cmTarget* target, ImportPropertyMap& properties,
                     std::vector<std::string>& missingTargets);
@@ -176,7 +174,7 @@ protected:
   std::set<cmTarget*> ExportedTargets;
 
 private:
-  void PopulateInterfaceProperty(const std::string&, const std::string&,
+  void PopulateInterfaceProperty(const char *, const char *,
                                  cmTarget *target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,

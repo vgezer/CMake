@@ -184,8 +184,7 @@ cmComputeLinkDepends
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // The configuration being linked.
-  this->HasConfig = config && *config;
-  this->Config = (this->HasConfig)? config : "";
+  this->Config = (config && *config)? config : 0;
   this->LinkType = this->Target->ComputeLinkType(this->Config);
 
   // Enable debug mode if requested.
@@ -255,8 +254,7 @@ cmComputeLinkDepends::Compute()
             "---------------------------------------"
             "---------------------------------------\n");
     fprintf(stderr, "Link dependency analysis for target %s, config %s\n",
-            this->Target->GetName(),
-            this-HasConfig?this->Config.c_str():"noconfig");
+            this->Target->GetName(), this->Config?this->Config:"noconfig");
     this->DisplayConstraintGraph();
     }
 
@@ -280,12 +278,12 @@ cmComputeLinkDepends::Compute()
 }
 
 //----------------------------------------------------------------------------
-std::map<std::string, int>::iterator
+std::map<cmStdString, int>::iterator
 cmComputeLinkDepends::AllocateLinkEntry(std::string const& item)
 {
-  std::map<std::string, int>::value_type
+  std::map<cmStdString, int>::value_type
     index_entry(item, static_cast<int>(this->EntryList.size()));
-  std::map<std::string, int>::iterator
+  std::map<cmStdString, int>::iterator
     lei = this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.push_back(LinkEntry());
   this->InferredDependSets.push_back(0);
@@ -298,7 +296,7 @@ int cmComputeLinkDepends::AddLinkEntry(int depender_index,
                                        std::string const& item)
 {
   // Check if the item entry has already been added.
-  std::map<std::string, int>::iterator lei = this->LinkEntryIndex.find(item);
+  std::map<cmStdString, int>::iterator lei = this->LinkEntryIndex.find(item);
   if(lei != this->LinkEntryIndex.end())
     {
     // Yes.  We do not need to follow the item's dependencies again.
@@ -424,7 +422,7 @@ cmComputeLinkDepends
 void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 {
   // Check if the target already has an entry.
-  std::map<std::string, int>::iterator lei =
+  std::map<cmStdString, int>::iterator lei =
     this->LinkEntryIndex.find(dep.Item);
   if(lei == this->LinkEntryIndex.end())
     {

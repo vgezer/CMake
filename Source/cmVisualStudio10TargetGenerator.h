@@ -98,7 +98,7 @@ private:
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;
-  typedef std::map<std::string, Options*> OptionsMap;
+  typedef std::map<cmStdString, Options*> OptionsMap;
   OptionsMap ClOptions;
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
@@ -113,7 +113,7 @@ private:
   cmLocalVisualStudio7Generator* LocalGenerator;
   std::set<cmSourceFile*> SourcesVisited;
 
-  typedef std::map<std::string, ToolSources> ToolSourceMap;
+  typedef std::map<cmStdString, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;
 };
 

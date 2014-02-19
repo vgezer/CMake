@@ -432,8 +432,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     fpath += "/CMakeSystem.cmake";
     mf->ReadListFile(0,fpath.c_str());
     }
-  std::map<std::string, bool> needTestLanguage;
-  std::map<std::string, bool> needSetLanguageEnabledMaps;
+  std::map<cmStdString, bool> needTestLanguage;
+  std::map<cmStdString, bool> needSetLanguageEnabledMaps;
   // foreach language
   // load the CMakeDetermine(LANG)Compiler.cmake file to find
   // the compiler
@@ -722,7 +722,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
-                                            std::string const& lang,
+                                            std::string lang,
                                             const char* envVar) const
 {
   // Subclasses override this method if they do not support this advice.
@@ -744,7 +744,7 @@ void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
-                                                std::string const& lang) const
+                                                     std::string lang) const
 {
   std::string compilerIdVar = "CMAKE_" + lang + "_COMPILER_ID";
   const char* compilerId = mf->GetDefinition(compilerIdVar.c_str());
@@ -822,7 +822,7 @@ cmGlobalGenerator::GetLanguageOutputExtension(cmSourceFile const& source) const
 {
   if(const char* lang = source.GetLanguage())
     {
-    std::map<std::string, std::string>::const_iterator it =
+    std::map<cmStdString, cmStdString>::const_iterator it =
                                   this->LanguageToOutputExtension.find(lang);
 
     if(it != this->LanguageToOutputExtension.end())
@@ -856,7 +856,7 @@ const char* cmGlobalGenerator::GetLanguageFromExtension(const char* ext) const
     {
     ++ext;
     }
-  std::map<std::string, std::string>::const_iterator it
+  std::map<cmStdString, cmStdString>::const_iterator it
                                         = this->ExtensionToLanguage.find(ext);
   if(it != this->ExtensionToLanguage.end())
     {
@@ -1007,7 +1007,7 @@ bool cmGlobalGenerator::IsDependedOn(const char* project,
                                      cmTarget const* targetIn)
 {
   // Get all local gens for this project
-  std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator it =
+  std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator it =
                                               this->ProjectMap.find(project);
   if (it == this->ProjectMap.end())
     {
@@ -1144,6 +1144,12 @@ void cmGlobalGenerator::Generate()
 
   // Check whether this generator is allowed to run.
   if(!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS())
+    {
+    return;
+    }
+
+  // Check that all targets are valid.
+  if(!this->CheckTargets())
     {
     return;
     }
@@ -1300,6 +1306,35 @@ bool cmGlobalGenerator::ComputeTargetDepends()
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalGenerator::CheckTargets()
+{
+  // Make sure all targets can find their source files.
+  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
+    {
+    cmTargets& targets =
+      this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    for(cmTargets::iterator ti = targets.begin();
+        ti != targets.end(); ++ti)
+      {
+      cmTarget& target = ti->second;
+      if(target.GetType() == cmTarget::EXECUTABLE ||
+         target.GetType() == cmTarget::STATIC_LIBRARY ||
+         target.GetType() == cmTarget::SHARED_LIBRARY ||
+         target.GetType() == cmTarget::MODULE_LIBRARY ||
+         target.GetType() == cmTarget::OBJECT_LIBRARY ||
+         target.GetType() == cmTarget::UTILITY)
+        {
+        if(!target.FindSourceFiles())
+          {
+          return false;
+          }
+        }
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -1439,6 +1474,7 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
         continue;
         }
       cmGeneratorTarget* gt = ti->second;
+      gt->ClassifySources();
       gt->LookupObjectLibraries();
       this->ComputeTargetObjects(gt);
       }
@@ -1512,8 +1548,8 @@ void cmGlobalGenerator::ComputeTargetObjects(cmGeneratorTarget*) const
 
 void cmGlobalGenerator::CheckLocalGenerators()
 {
-  std::map<std::string, std::string> notFoundMap;
-//  std::set<std::string> notFoundMap;
+  std::map<cmStdString, cmStdString> notFoundMap;
+//  std::set<cmStdString> notFoundMap;
   // after it is all done do a ConfigureFinalPass
   cmCacheManager* manager = 0;
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
@@ -1593,7 +1629,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
   if(notFoundMap.size())
     {
     std::string notFoundVars;
-    for(std::map<std::string, std::string>::const_iterator
+    for(std::map<cmStdString, cmStdString>::const_iterator
         ii = notFoundMap.begin();
         ii != notFoundMap.end();
         ++ii)
@@ -1951,7 +1987,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 void
 cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang) const
 {
-  for(std::map<std::string, bool>::const_iterator i =
+  for(std::map<cmStdString, bool>::const_iterator i =
         this->LanguageEnabled.begin(); i != this->LanguageEnabled.end(); ++i)
     {
     lang.push_back(i->first);
@@ -1960,7 +1996,7 @@ cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang) const
 
 int cmGlobalGenerator::GetLinkerPreference(const char* lang) const
 {
-  std::map<std::string, int>::const_iterator it =
+  std::map<cmStdString, int>::const_iterator it =
                                    this->LanguageToLinkerPreference.find(lang);
   if (it != this->LanguageToLinkerPreference.end())
     {
@@ -2037,7 +2073,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
 
 ///! Find a local generator by its startdirectory
 cmLocalGenerator*
-cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
+cmGlobalGenerator::FindLocalGenerator(const char* start_dir) const
 {
   for(std::vector<cmLocalGenerator*>::const_iterator it =
       this->LocalGenerators.begin(); it != this->LocalGenerators.end(); ++it)
@@ -2052,41 +2088,60 @@ cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddAlias(const std::string& name, cmTarget *tgt)
+void cmGlobalGenerator::AddAlias(const char *name, cmTarget *tgt)
 {
   this->AliasTargets[name] = tgt;
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::IsAlias(const std::string& name) const
+bool cmGlobalGenerator::IsAlias(const char *name) const
 {
   return this->AliasTargets.find(name) != this->AliasTargets.end();
 }
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmGlobalGenerator::FindTarget(const std::string& name,
+cmGlobalGenerator::FindTarget(const char* project, const char* name,
                               bool excludeAliases) const
 {
-  if (!excludeAliases)
+  // if project specific
+  if(project)
     {
-    std::map<std::string, cmTarget*>::const_iterator ai
-                                            = this->AliasTargets.find(name);
-    if (ai != this->AliasTargets.end())
+    std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+      gens = this->ProjectMap.find(project);
+    for(unsigned int i = 0; i < gens->second.size(); ++i)
       {
-      return ai->second;
+      cmTarget* ret = (gens->second)[i]->GetMakefile()->FindTarget(name,
+                                                            excludeAliases);
+      if(ret)
+        {
+        return ret;
+        }
       }
     }
-  std::map<std::string,cmTarget *>::const_iterator i =
-    this->TotalTargets.find ( name );
-  if ( i != this->TotalTargets.end() )
+  // if all projects/directories
+  else
     {
-    return i->second;
-    }
-  i = this->ImportedTargets.find(name);
-  if ( i != this->ImportedTargets.end() )
-    {
-    return i->second;
+    if (!excludeAliases)
+      {
+      std::map<cmStdString, cmTarget*>::const_iterator ai
+                                              = this->AliasTargets.find(name);
+      if (ai != this->AliasTargets.end())
+        {
+        return ai->second;
+        }
+      }
+    std::map<cmStdString,cmTarget *>::const_iterator i =
+      this->TotalTargets.find ( name );
+    if ( i != this->TotalTargets.end() )
+      {
+      return i->second;
+      }
+    i = this->ImportedTargets.find(name);
+    if ( i != this->ImportedTargets.end() )
+      {
+      return i->second;
+      }
     }
   return 0;
 }
@@ -2100,7 +2155,7 @@ cmGlobalGenerator::NameResolvesToFramework(const std::string& libname) const
     return true;
     }
 
-  if(cmTarget* tgt = this->FindTarget(libname.c_str()))
+  if(cmTarget* tgt = this->FindTarget(0, libname.c_str()))
     {
     if(tgt->IsFrameworkOnApple())
        {
@@ -2289,7 +2344,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     {
     if(!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.')
       {
-      std::set<std::string>* componentsSet = &this->InstallComponents;
+      std::set<cmStdString>* componentsSet = &this->InstallComponents;
       cpackCommandLines.erase(cpackCommandLines.begin(),
         cpackCommandLines.end());
       depends.erase(depends.begin(), depends.end());
@@ -2297,7 +2352,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       if ( componentsSet->size() > 0 )
         {
         ostr << "Available install components are:";
-        std::set<std::string>::iterator it;
+        std::set<cmStdString>::iterator it;
         for (
           it = componentsSet->begin();
           it != componentsSet->end();
@@ -2458,7 +2513,7 @@ void cmGlobalGenerator::EnableMinGWLanguage(cmMakefile *mf)
 
 //----------------------------------------------------------------------------
 cmTarget cmGlobalGenerator::CreateGlobalTarget(
-  const std::string& name, const char* message,
+  const char* name, const char* message,
   const cmCustomCommandLines* commandLines,
   std::vector<std::string> depends,
   const char* workingDirectory)
@@ -2511,7 +2566,7 @@ cmGlobalGenerator::GenerateRuleFile(std::string const& output) const
 std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
                                                   std::string const& l) const
 {
-  std::map<std::string, std::string>::const_iterator it =
+  std::map<cmStdString, cmStdString>::const_iterator it =
                               this->LanguageToOriginalSharedLibFlags.find(l);
   if(it != this->LanguageToOriginalSharedLibFlags.end())
     {
@@ -2521,8 +2576,7 @@ std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AppendDirectoryForConfig(const char*,
-                                                 const std::string&,
+void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
                                                  const char*, std::string&)
 {
   // Subclasses that support multiple configurations should implement
@@ -2673,7 +2727,7 @@ void cmGlobalGenerator::AddTargetDepends(cmTarget const* target,
 
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddToManifest(const std::string& config,
+void cmGlobalGenerator::AddToManifest(const char* config,
                                       std::string const& f)
 {
   // Add to the main manifest for this configuration.
@@ -2686,7 +2740,7 @@ void cmGlobalGenerator::AddToManifest(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-std::set<std::string> const&
+std::set<cmStdString> const&
 cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
 {
   DirectoryContent& dc = this->DirectoryContentMap[dir];
@@ -2792,7 +2846,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
     fname = line.substr(33, line.npos);
 
     // Look for a hash for this file's rule.
-    std::map<std::string, RuleHash>::const_iterator rhi =
+    std::map<cmStdString, RuleHash>::const_iterator rhi =
       this->RuleHashes.find(fname);
     if(rhi != this->RuleHashes.end())
       {
@@ -2837,7 +2891,7 @@ void cmGlobalGenerator::WriteRuleHashes(std::string const& pfile)
     {
     cmGeneratedFileStream fout(pfile.c_str());
     fout << "# Hashes of file build rules.\n";
-    for(std::map<std::string, RuleHash>::const_iterator
+    for(std::map<cmStdString, RuleHash>::const_iterator
           rhi = this->RuleHashes.begin(); rhi != this->RuleHashes.end(); ++rhi)
       {
       fout.write(rhi->second.Data, 32);
@@ -2858,7 +2912,7 @@ void cmGlobalGenerator::WriteSummary()
   cmGeneratedFileStream fout(fname.c_str());
 
   // Generate summary information files for each target.
-  for(std::map<std::string,cmTarget *>::const_iterator ti =
+  for(std::map<cmStdString,cmTarget *>::const_iterator ti =
         this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
     if ((ti->second)->GetType() == cmTarget::INTERFACE_LIBRARY)

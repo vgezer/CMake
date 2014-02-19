@@ -34,7 +34,7 @@ bool cmParsePHPCoverage::ReadUntil(std::istream& in, char until)
   return true;
 }
 bool cmParsePHPCoverage::ReadCoverageArray(std::istream& in,
-                                           std::string const& fileName)
+                                           cmStdString const& fileName)
 {
   cmCTestCoverageHandlerContainer::SingleFileCoverageVector& coverageVector
     = this->Coverage.TotalCoverage[fileName];
@@ -166,7 +166,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
     // read the string data
     in.read(s, size-1);
     s[size-1] = 0;
-    std::string fileName = s;
+    cmStdString fileName = s;
     delete [] s;
     // read close quote
     if(in.get(c) && c != '"')

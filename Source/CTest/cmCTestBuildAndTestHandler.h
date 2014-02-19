@@ -54,7 +54,7 @@ protected:
                std::string &cmakeOutString,
                std::string &cwd, cmake *cm);
 
-  std::string  Output;
+  cmStdString  Output;
 
   std::string              BuildGenerator;
   std::string              BuildGeneratorToolset;

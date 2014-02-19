@@ -61,7 +61,7 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 void cmExtraCodeBlocksGenerator::Generate()
 {
   // for each sub project in the project create a codeblocks project
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)
@@ -243,7 +243,7 @@ void cmExtraCodeBlocksGenerator
   Tree tree;
 
   // build tree of virtual folders
-  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
           it = this->GlobalGenerator->GetProjectMap().begin();
          it != this->GlobalGenerator->GetProjectMap().end();
          ++it)
@@ -413,7 +413,7 @@ void cmExtraCodeBlocksGenerator
             bool isCFile = false;
             if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
               {
-              for(std::set<std::string>::const_iterator
+              for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
                   ext !=  mf->GetSourceExtensions().end();
                   ++ext)
@@ -459,7 +459,7 @@ void cmExtraCodeBlocksGenerator
     headerBasename+=cmSystemTools::GetFilenameWithoutExtension(sit->first);
 
     // check if there's a matching header around
-    for(std::set<std::string>::const_iterator
+    for(std::vector<std::string>::const_iterator
         ext = mf->GetHeaderExtensions().begin();
         ext !=  mf->GetHeaderExtensions().end();
         ++ext)

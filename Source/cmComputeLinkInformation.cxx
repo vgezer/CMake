@@ -239,7 +239,7 @@ because this need be done only for shared libraries without soname-s.
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation
-::cmComputeLinkInformation(cmTarget const* target, const std::string& config,
+::cmComputeLinkInformation(cmTarget const* target, const char* config,
                            cmTarget const* headTarget)
 {
   // Store context information.
@@ -505,8 +505,7 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config.c_str(),
-                           this->HeadTarget);
+  cmComputeLinkDepends cld(this->Target, this->Config, this->HeadTarget);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
@@ -625,7 +624,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
                                        cmTarget const* tgt)
 {
   // Compute the proper name to use to link this library.
-  const std::string& config = this->Config;
+  const char* config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
   if(impexe && !this->UseImportLibrary && !this->LoaderFlag)
     {
@@ -903,7 +902,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   // be the library name.  Match index 3 will be the library
   // extension.
   reg = "^(";
-  for(std::set<std::string>::iterator p = this->LinkPrefixes.begin();
+  for(std::set<cmStdString>::iterator p = this->LinkPrefixes.begin();
       p != this->LinkPrefixes.end(); ++p)
     {
     reg += *p;
@@ -1641,7 +1640,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
 
   // List the paths old behavior is adding.
   os << "and other libraries with known full path:\n";
-  std::set<std::string> emitted;
+  std::set<cmStdString> emitted;
   for(std::vector<std::string>::const_iterator
         i = this->OldLinkDirItems.begin();
       i != this->OldLinkDirItems.end(); ++i)
@@ -1857,7 +1856,7 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
 //----------------------------------------------------------------------------
 static void cmCLI_ExpandListUnique(const char* str,
                                    std::vector<std::string>& out,
-                                   std::set<std::string>& emitted)
+                                   std::set<cmStdString>& emitted)
 {
   std::vector<std::string> tmp;
   cmSystemTools::ExpandListArgument(str, tmp);
@@ -1895,7 +1894,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Construct the RPATH.
-  std::set<std::string> emitted;
+  std::set<cmStdString> emitted;
   if(use_install_rpath)
     {
     const char* install_rpath = this->Target->GetProperty("INSTALL_RPATH");

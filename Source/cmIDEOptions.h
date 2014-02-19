@@ -40,13 +40,13 @@ protected:
   // Then parse the command line flags specified in CMAKE_CXX_FLAGS
   // and CMAKE_C_FLAGS
   // and overwrite or add new values to this map
-  std::map<std::string, std::string> FlagMap;
+  std::map<cmStdString, cmStdString> FlagMap;
 
   // Preprocessor definitions.
   std::vector<std::string> Defines;
 
   // Unrecognized flags that get no special handling.
-  std::string FlagString;
+  cmStdString FlagString;
 
   bool DoingDefine;
   bool AllowDefine;

@@ -237,7 +237,7 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules
-(const std::string& linkRuleVar, const std::string& extraFlags, bool relink)
+(const char* linkRuleVar, const char* extraFlags, bool relink)
 {
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
@@ -261,7 +261,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Create set of linking flags.
   std::string linkFlags;
-  this->LocalGenerator->AppendFlags(linkFlags, extraFlags.c_str());
+  this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
 
   // Add OSX version flags, if any.
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||

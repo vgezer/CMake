@@ -91,7 +91,7 @@ bool cmSetTestsPropertiesCommand
 
 
 bool cmSetTestsPropertiesCommand
-::SetOneTest(const std::string& tname,
+::SetOneTest(const char *tname,
              std::vector<std::string> &propertyPairs,
              cmMakefile *mf, std::string &errors)
 {

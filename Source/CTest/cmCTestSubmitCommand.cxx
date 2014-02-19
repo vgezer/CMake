@@ -72,7 +72,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   if (notesFilesVariable)
     {
     std::vector<std::string> notesFiles;
-    cmCTest::VectorOfStrings newNotesFiles;
+    std::vector<cmStdString> newNotesFiles;
     cmSystemTools::ExpandListArgument(notesFilesVariable,notesFiles);
     std::vector<std::string>::iterator it;
     for ( it = notesFiles.begin();
@@ -89,7 +89,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   if (extraFilesVariable)
     {
     std::vector<std::string> extraFiles;
-    cmCTest::VectorOfStrings newExtraFiles;
+    std::vector<cmStdString> newExtraFiles;
     cmSystemTools::ExpandListArgument(extraFilesVariable,extraFiles);
     std::vector<std::string>::iterator it;
     for ( it = extraFiles.begin();
@@ -222,7 +222,7 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
 
   if(this->ArgumentDoing == ArgumentDoingFiles)
     {
-    std::string filename(arg);
+    cmStdString filename(arg);
     if(cmSystemTools::FileExists(filename.c_str()))
       {
       this->Files.insert(filename);

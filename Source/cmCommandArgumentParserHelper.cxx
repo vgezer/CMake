@@ -49,14 +49,14 @@ void cmCommandArgumentParserHelper::SetLineFile(long line, const char* file)
   this->FileName = file;
 }
 
-char* cmCommandArgumentParserHelper::AddString(const std::string& str)
+char* cmCommandArgumentParserHelper::AddString(const char* str)
 {
-  if ( str.empty() )
+  if ( !str || !*str )
     {
     return this->EmptyVariable;
     }
-  char* stVal = new char[str.size()+1];
-  strcpy(stVal, str.c_str());
+  char* stVal = new char[strlen(str)+1];
+  strcpy(stVal, str);
   this->Variables.push_back(stVal);
   return stVal;
 }
@@ -153,7 +153,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     {
     return this->AddString(cmSystemTools::EscapeQuotes(value).c_str());
     }
-  return this->AddString(value ? value : "");
+  return this->AddString(value);
 }
 
 char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
@@ -166,7 +166,7 @@ char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
     // then return an empty string
     if(!ret && this->RemoveEmpty)
       {
-      return this->AddString("");
+      return this->AddString(ret);
       }
     // if the ret was not 0, then return it
     if(ret)

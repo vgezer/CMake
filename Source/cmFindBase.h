@@ -42,14 +42,14 @@ protected:
   bool CheckForVariableInCache();
 
   // use by command during find
-  std::string VariableDocumentation;
-  std::string VariableName;
+  cmStdString VariableDocumentation;
+  cmStdString VariableName;
   std::vector<std::string> Names;
   bool NamesPerDir;
   bool NamesPerDirAllowed;
 
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
-  std::string EnvironmentPath; // LIB,INCLUDE
+  cmStdString EnvironmentPath; // LIB,INCLUDE
 
   bool AlreadyInCache;
   bool AlreadyInCacheWithoutMetaInfo;
@@ -63,8 +63,8 @@ private:
   void AddUserGuessPath();
 
   // Helpers.
-  void AddCMakePrefixPath(const std::string& variable);
-  void AddEnvPrefixPath(const std::string& variable);
+  void AddCMakePrefixPath(const char* variable);
+  void AddEnvPrefixPath(const char* variable);
   void AddPrefixPaths(std::vector<std::string> const& in_paths,
                       PathType pathType);
 };

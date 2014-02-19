@@ -59,7 +59,7 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
-  std::set<std::string> lang;
+  std::set<cmStdString> lang;
   lang.insert("C");
   lang.insert("CXX");
   lang.insert("RC");
@@ -228,7 +228,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator
-::CreateSingleVCProj(const std::string& lname, cmTarget &target)
+::CreateSingleVCProj(const char *lname, cmTarget &target)
 {
   this->FortranProject =
     static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
@@ -245,7 +245,7 @@ void cmLocalVisualStudio7Generator
     }
 
   // add to the list of projects
-  std::string const& pname = lname;
+  std::string pname = lname;
   target.SetProperty("GENERATOR_FILE_NAME",lname);
   // create the dsp.cmake file
   std::string fname;
@@ -334,8 +334,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 }
 
 void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
-                                                    const std::string& libName,
-                                                    cmTarget &target)
+                                                        const char *libName,
+                                                        cmTarget &target)
 {
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
@@ -637,9 +637,9 @@ private:
 
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
-                                                const std::string& configName,
-                                                const char *libName,
-                                                cmTarget &target)
+                                                       const char* configName,
+                                                       const char *libName,
+                                                       cmTarget &target)
 {
   const char* mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if(!mfcFlag)
@@ -745,7 +745,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                         table,
                         this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
-  std::string asmLocation = configName + "/";
+  std::string asmLocation = std::string(configName) + "/";
   targetOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
@@ -1457,7 +1457,7 @@ public:
                                       cmTarget& target,
                                       cmSourceFile const& sf,
                                       std::vector<std::string>* configs);
-  std::map<std::string, cmLVS7GFileConfig> FileConfigMap;
+  std::map<cmStdString, cmLVS7GFileConfig> FileConfigMap;
 };
 
 cmLocalVisualStudio7GeneratorFCInfo
@@ -1702,7 +1702,7 @@ bool cmLocalVisualStudio7Generator
             aCompilerTool = "VFCustomBuildTool";
             }
           }
-        for(std::map<std::string, cmLVS7GFileConfig>::const_iterator
+        for(std::map<cmStdString, cmLVS7GFileConfig>::const_iterator
               fci = fcinfo.FileConfigMap.begin();
             fci != fcinfo.FileConfigMap.end(); ++fci)
           {
@@ -1893,7 +1893,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjEndGroup(std::ostream& fout)
 // look for custom rules on a target and collect them together
 void cmLocalVisualStudio7Generator
 ::OutputTargetRules(std::ostream& fout,
-                    const std::string& configName,
+                    const char* configName,
                     cmTarget &target,
                     const char * /*libName*/)
 {
@@ -1955,7 +1955,7 @@ void cmLocalVisualStudio7Generator::WriteProjectSCC(std::ostream& fout,
 void
 cmLocalVisualStudio7Generator
 ::WriteProjectStartFortran(std::ostream& fout,
-                           const std::string& libName,
+                           const char *libName,
                            cmTarget & target)
 {
 
@@ -2015,7 +2015,7 @@ cmLocalVisualStudio7Generator
 
 void
 cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
-                                                 const std::string& libName,
+                                                 const char *libName,
                                                  cmTarget & target,
                                                  std::vector<cmSourceGroup> &)
 {
@@ -2038,7 +2038,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
   const char* projLabel = target.GetProperty("PROJECT_LABEL");
   if(!projLabel)
     {
-    projLabel = libName.c_str();
+    projLabel = libName;
     }
   const char* keyword = target.GetProperty("VS_KEYWORD");
   if(!keyword)
@@ -2090,7 +2090,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(std::ostream& fout,
        << "</VisualStudioProject>\n";
 }
 
-std::string cmLocalVisualStudio7GeneratorEscapeForXML(const std::string& s)
+std::string cmLocalVisualStudio7GeneratorEscapeForXML(const char* s)
 {
   std::string ret = s;
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
@@ -2101,7 +2101,7 @@ std::string cmLocalVisualStudio7GeneratorEscapeForXML(const std::string& s)
   return ret;
 }
 
-std::string cmLocalVisualStudio7Generator::EscapeForXML(const std::string& s)
+std::string cmLocalVisualStudio7Generator::EscapeForXML(const char* s)
 {
   return cmLocalVisualStudio7GeneratorEscapeForXML(s);
 }

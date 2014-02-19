@@ -43,13 +43,13 @@ private:
   class HashString
     {
   public:
-    size_t operator()(const std::string& s) const
+    size_t operator()(const cmStdString& s) const
       {
       return h(s.c_str());
       }
     cmsys::hash<const char*> h;
     };
-  typedef cmsys::hash_map<std::string,
+  typedef cmsys::hash_map<cmStdString,
                           cmFileTimeComparison_Type, HashString> FileStatsMap;
   FileStatsMap Files;
 #endif

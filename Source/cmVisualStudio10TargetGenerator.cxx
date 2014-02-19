@@ -140,7 +140,7 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   const char* tag,
-  const std::string& config,
+  const char* config,
   int indentLevel,
   const char* attribute,
   const char* end,
@@ -1666,10 +1666,10 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
-  if(!def.empty())
+  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
     {
-    linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
+    linkOptions.AddFlag("ModuleDefinitionFile",
+                        this->GeneratorTarget->ModuleDefinitionFile.c_str());
     }
 
   this->LinkOptions[config] = pOptions.release();

@@ -91,7 +91,7 @@ cmDependsC::~cmDependsC()
 {
   this->WriteCacheFile();
 
-  for (std::map<std::string, cmIncludeLines*>::iterator it=
+  for (std::map<cmStdString, cmIncludeLines*>::iterator it=
          this->FileCache.begin(); it!=this->FileCache.end(); ++it)
     {
     delete it->second;
@@ -116,7 +116,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
     return false;
     }
 
-  std::set<std::string> dependencies;
+  std::set<cmStdString> dependencies;
   bool haveDeps = false;
 
   if (this->ValidDeps != 0)
@@ -149,7 +149,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
       this->Encountered.insert(*srcIt);
       }
 
-    std::set<std::string> scanned;
+    std::set<cmStdString> scanned;
 
     // Use reserve to allocate enough memory for tempPathStr
     // so that during the loops no memory is allocated or freed
@@ -182,7 +182,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
         }
       else
         {
-        std::map<std::string, std::string>::iterator
+        std::map<cmStdString, cmStdString>::iterator
           headerLocationIt=this->HeaderLocationCache.find(current.FileName);
         if (headerLocationIt!=this->HeaderLocationCache.end())
           {
@@ -224,7 +224,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
         scanned.insert(fullName);
 
         // Check whether this file is already in the cache
-        std::map<std::string, cmIncludeLines*>::iterator fileIt=
+        std::map<cmStdString, cmIncludeLines*>::iterator fileIt=
           this->FileCache.find(fullName);
         if (fileIt!=this->FileCache.end())
           {
@@ -270,7 +270,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
   internalDepends << obj << std::endl;
-  for(std::set<std::string>::const_iterator i=dependencies.begin();
+  for(std::set<cmStdString>::const_iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
     makeDepends << obj << ": " <<
@@ -392,7 +392,7 @@ void cmDependsC::WriteCacheFile() const
   cacheOut << this->IncludeRegexComplainString << "\n\n";
   cacheOut << this->IncludeRegexTransformString << "\n\n";
 
-  for (std::map<std::string, cmIncludeLines*>::const_iterator fileIt=
+  for (std::map<cmStdString, cmIncludeLines*>::const_iterator fileIt=
          this->FileCache.begin();
        fileIt!=this->FileCache.end(); ++fileIt)
     {
@@ -421,7 +421,7 @@ void cmDependsC::WriteCacheFile() const
 
 //----------------------------------------------------------------------------
 void cmDependsC::Scan(std::istream& is, const char* directory,
-  const std::string& fullName)
+  const cmStdString& fullName)
 {
   cmIncludeLines* newCacheEntry=new cmIncludeLines;
   newCacheEntry->Used=true;

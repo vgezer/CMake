@@ -118,9 +118,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 void
 cmExportBuildFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
-                              const std::string& config,
-                              std::string const& suffix,
-                              std::vector<std::string> &missingTargets)
+                              const char* config, std::string const& suffix,
+                            std::vector<std::string> &missingTargets)
 {
   for(std::vector<cmTarget*>::const_iterator
         tei = this->Exports.begin();
@@ -167,8 +166,7 @@ void cmExportBuildFileGenerator::SetExportSet(cmExportSet *exportSet)
 //----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
-::SetImportLocationProperty(const std::string& config,
-                            std::string const& suffix,
+::SetImportLocationProperty(const char* config, std::string const& suffix,
                             cmTarget* target, ImportPropertyMap& properties)
 {
   // Get the makefile in which to lookup target information.

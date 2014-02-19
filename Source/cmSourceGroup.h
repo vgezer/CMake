@@ -46,7 +46,7 @@ public:
   /**
    * Add a file name to the explicit list of files for this group.
    */
-  void AddGroupFile(const std::string& name);
+  void AddGroupFile(const char* name);
 
   /**
    * Add child to this sourcegroup
@@ -118,7 +118,7 @@ private:
   /**
    * Set of file names explicitly added to this group.
    */
-  std::set<std::string> GroupFiles;
+  std::set<cmStdString> GroupFiles;
 
   /**
    * Vector of all source files that have been assigned to

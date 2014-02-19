@@ -166,13 +166,13 @@ public:
 
   void AddInstallComponent(const char* component);
 
-  const std::set<std::string>* GetInstallComponents() const
+  const std::set<cmStdString>* GetInstallComponents() const
     { return &this->InstallComponents; }
 
   cmExportSetMap& GetExportSets() {return this->ExportSets;}
 
   /** Add a file to the manifest of generated targets for a configuration.  */
-  void AddToManifest(const std::string& config, std::string const& f);
+  void AddToManifest(const char* config, std::string const& f);
 
   void EnableInstallTarget();
 
@@ -210,11 +210,11 @@ public:
   virtual void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const std::string& name,
+  cmTarget* FindTarget(const char* project, const char* name,
                        bool excludeAliases = false) const;
 
-  void AddAlias(const std::string& name, cmTarget *tgt);
-  bool IsAlias(const std::string& name) const;
+  void AddAlias(const char *name, cmTarget *tgt);
+  bool IsAlias(const char *name) const;
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
@@ -224,13 +224,13 @@ public:
       target in the project */
   bool IsDependedOn(const char* project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
-  cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
+  cmLocalGenerator* FindLocalGenerator(const char* start_dir) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
       is useful for leading or trailing slashes.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const std::string& config,
+                                        const char* config,
                                         const char* suffix,
                                         std::string& dir);
 
@@ -243,7 +243,7 @@ public:
       from disk at most once and cached.  During the generation step
       the content will include the target files to be built even if
       they do not yet exist.  */
-  std::set<std::string> const& GetDirectoryContent(std::string const& dir,
+  std::set<cmStdString> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
 
   void AddTarget(cmTarget* t);
@@ -275,7 +275,7 @@ public:
   /** Get per-target generator information.  */
   cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
 
-  const std::map<std::string, std::vector<cmLocalGenerator*> >& GetProjectMap()
+  const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
 
   // track files replaced during a Generate
@@ -286,7 +286,7 @@ public:
                    std::string const& content);
 
   /** Return whether the given binary directory is unused.  */
-  bool BinaryDirectoryIsNew(const std::string& dir)
+  bool BinaryDirectoryIsNew(const char* dir)
     {
     return this->BinaryDirectories.insert(dir).second;
     }
@@ -340,6 +340,7 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
+  bool CheckTargets();
   typedef std::vector<std::pair<cmQtAutoGenerators,
                                 cmTarget const*> > AutogensType;
   void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
@@ -355,7 +356,7 @@ protected:
   bool IsExcluded(cmLocalGenerator* root, cmTarget const& target) const;
   void FillLocalGeneratorToTargetMap();
   void CreateDefaultGlobalTargets(cmTargets* targets);
-  cmTarget CreateGlobalTarget(const std::string& name, const char* message,
+  cmTarget CreateGlobalTarget(const char* name, const char* message,
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, const char* workingDir);
 
@@ -363,18 +364,18 @@ protected:
   bool UseLinkScript;
   bool ForceUnixPaths;
   bool ToolSupportsColor;
-  std::string FindMakeProgramFile;
-  std::string ConfiguredFilesPath;
+  cmStdString FindMakeProgramFile;
+  cmStdString ConfiguredFilesPath;
   cmake *CMakeInstance;
   std::vector<cmLocalGenerator *> LocalGenerators;
   cmLocalGenerator* CurrentLocalGenerator;
   // map from project name to vector of local generators in that project
-  std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
+  std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
   std::map<cmLocalGenerator*, std::set<cmTarget const*> >
                                                     LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
-  std::set<std::string> InstallComponents;
+  std::set<cmStdString> InstallComponents;
   bool InstallTargetEnabled;
   // Sets of named target exports
   cmExportSetMap ExportSets;
@@ -386,9 +387,9 @@ protected:
   cmTargetManifest TargetManifest;
 
   // All targets in the entire project.
-  std::map<std::string,cmTarget *> TotalTargets;
-  std::map<std::string,cmTarget *> AliasTargets;
-  std::map<std::string,cmTarget *> ImportedTargets;
+  std::map<cmStdString,cmTarget *> TotalTargets;
+  std::map<cmStdString,cmTarget *> AliasTargets;
+  std::map<cmStdString,cmTarget *> ImportedTargets;
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   virtual const char* GetPredefinedTargetsFolder();
@@ -400,18 +401,18 @@ private:
   float FirstTimeProgress;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator
-  std::map<std::string, bool> IgnoreExtensions;
-  std::map<std::string, bool> LanguageEnabled;
-  std::set<std::string> LanguagesReady; // Ready for try_compile
-  std::map<std::string, std::string> OutputExtensions;
-  std::map<std::string, std::string> LanguageToOutputExtension;
-  std::map<std::string, std::string> ExtensionToLanguage;
-  std::map<std::string, int> LanguageToLinkerPreference;
-  std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
+  std::map<cmStdString, bool> IgnoreExtensions;
+  std::map<cmStdString, bool> LanguageEnabled;
+  std::set<cmStdString> LanguagesReady; // Ready for try_compile
+  std::map<cmStdString, cmStdString> OutputExtensions;
+  std::map<cmStdString, cmStdString> LanguageToOutputExtension;
+  std::map<cmStdString, cmStdString> ExtensionToLanguage;
+  std::map<cmStdString, int> LanguageToLinkerPreference;
+  std::map<cmStdString, cmStdString> LanguageToOriginalSharedLibFlags;
 
   // Record hashes for rules and outputs.
   struct RuleHash { char Data[32]; };
-  std::map<std::string, RuleHash> RuleHashes;
+  std::map<cmStdString, RuleHash> RuleHashes;
   void CheckRuleHashes();
   void CheckRuleHashes(std::string const& pfile, std::string const& home);
   void WriteRuleHashes(std::string const& pfile);
@@ -420,10 +421,9 @@ private:
   void WriteSummary(cmTarget* target);
   void FinalizeTargetCompileInfo();
 
-  virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
+  virtual void PrintCompilerAdvice(std::ostream& os, std::string lang,
                                    const char* envVar) const;
-  void CheckCompilerIdCompatibility(cmMakefile* mf,
-                                    std::string const& lang) const;
+  void CheckCompilerIdCompatibility(cmMakefile* mf, std::string lang) const;
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 
@@ -447,18 +447,18 @@ private:
   virtual const char* GetBuildIgnoreErrorsFlag() const { return 0; }
 
   // Cache directory content and target files to be built.
-  struct DirectoryContent: public std::set<std::string>
+  struct DirectoryContent: public std::set<cmStdString>
   {
-    typedef std::set<std::string> derived;
+    typedef std::set<cmStdString> derived;
     bool LoadedFromDisk;
     DirectoryContent(): LoadedFromDisk(false) {}
     DirectoryContent(DirectoryContent const& dc):
       derived(dc), LoadedFromDisk(dc.LoadedFromDisk) {}
   };
-  std::map<std::string, DirectoryContent> DirectoryContentMap;
+  std::map<cmStdString, DirectoryContent> DirectoryContentMap;
 
   // Set of binary directories on disk.
-  std::set<std::string> BinaryDirectories;
+  std::set<cmStdString> BinaryDirectories;
 
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;

@@ -40,7 +40,7 @@ protected:
 
   // Method to scan a single file.
   void Scan(std::istream& is, const char* directory,
-    const std::string& fullName);
+    const cmStdString& fullName);
 
   // Regular expression to identify C preprocessor include directives.
   cmsys::RegularExpression IncludeRegexLine;
@@ -56,7 +56,7 @@ protected:
   // Regex to transform #include lines.
   std::string IncludeRegexTransformString;
   cmsys::RegularExpression IncludeRegexTransform;
-  typedef std::map<std::string, std::string> TransformRulesType;
+  typedef std::map<cmStdString, cmStdString> TransformRulesType;
   TransformRulesType TransformRules;
   void SetupTransforms();
   void ParseTransform(std::string const& xform);
@@ -66,8 +66,8 @@ public:
   // Data structures for dependency graph walk.
   struct UnscannedEntry
   {
-    std::string FileName;
-    std::string QuotedLocation;
+    cmStdString FileName;
+    cmStdString QuotedLocation;
   };
 
   struct cmIncludeLines
@@ -78,13 +78,13 @@ public:
   };
 protected:
   const std::map<std::string, DependencyVector>* ValidDeps;
-  std::set<std::string> Encountered;
+  std::set<cmStdString> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 
-  std::map<std::string, cmIncludeLines *> FileCache;
-  std::map<std::string, std::string> HeaderLocationCache;
+  std::map<cmStdString, cmIncludeLines *> FileCache;
+  std::map<cmStdString, cmStdString> HeaderLocationCache;
 
-  std::string CacheFileName;
+  cmStdString CacheFileName;
 
   void WriteCacheFile() const;
   void ReadCacheFile();

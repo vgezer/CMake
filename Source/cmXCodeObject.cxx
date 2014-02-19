@@ -108,7 +108,7 @@ void cmXCodeObject::Print(std::ostream& out)
     {
     out << separator;
     }
-  std::map<std::string, cmXCodeObject*>::iterator i;
+  std::map<cmStdString, cmXCodeObject*>::iterator i;
   cmXCodeObject::Indent(3*indentFactor, out);
   out << "isa = " << PBXTypeNames[this->IsA]  << ";" << separator;
   for(i = this->ObjectAttributes.begin();
@@ -138,7 +138,7 @@ void cmXCodeObject::Print(std::ostream& out)
       }
     else if(object->TypeValue == ATTRIBUTE_GROUP)
       {
-      std::map<std::string, cmXCodeObject*>::iterator j;
+      std::map<cmStdString, cmXCodeObject*>::iterator j;
       out << i->first << " = {" << separator;
       for(j = object->ObjectAttributes.begin(); j !=
             object->ObjectAttributes.end(); ++j)
@@ -236,7 +236,7 @@ void cmXCodeObject::CopyAttributes(cmXCodeObject* copy)
 }
 
 //----------------------------------------------------------------------------
-void cmXCodeObject::PrintString(std::ostream& os,std::string String)
+void cmXCodeObject::PrintString(std::ostream& os,cmStdString String)
 {
   // The string needs to be quoted if it contains any characters
   // considered special by the Xcode project file parser.
@@ -266,7 +266,7 @@ void cmXCodeObject::PrintString(std::ostream& os) const
 }
 
 //----------------------------------------------------------------------------
-void cmXCodeObject::SetString(const std::string& s)
+void cmXCodeObject::SetString(const char* s)
 {
   this->String = s;
 }

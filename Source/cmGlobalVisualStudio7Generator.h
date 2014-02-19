@@ -90,11 +90,11 @@ public:
 
   ///! Create a GUID or get an existing one.
   void CreateGUID(const char* name);
-  std::string GetGUID(const std::string& name);
+  std::string GetGUID(const char* name);
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const std::string& config,
+                                        const char* config,
                                         const char* suffix,
                                         std::string& dir);
 
@@ -156,7 +156,7 @@ protected:
                                     const char* name,
                                     const char* path,
                                     const char* typeGuid,
-                                    const std::set<std::string>&
+                                    const std::set<cmStdString>&
                                     dependencies);
 
   std::string ConvertToSolutionPath(const char* path);
@@ -164,7 +164,7 @@ protected:
   std::set<std::string> IsPartOfDefaultBuild(const char* project,
                                              cmTarget const* target);
   std::vector<std::string> Configurations;
-  std::map<std::string, std::string> GUIDMap;
+  std::map<cmStdString, cmStdString> GUIDMap;
 
   virtual void WriteFolders(std::ostream& fout);
   virtual void WriteFoldersContent(std::ostream& fout);

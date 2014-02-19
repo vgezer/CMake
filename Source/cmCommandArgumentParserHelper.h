@@ -77,8 +77,8 @@ public:
   char BSLASHVariable[3];
 
 private:
-  std::string::size_type InputBufferPos;
-  std::string InputBuffer;
+  cmStdString::size_type InputBufferPos;
+  cmStdString InputBuffer;
   std::vector<char> OutputBuffer;
   int CurrentLine;
   int Verbose;
@@ -86,7 +86,7 @@ private:
   void Print(const char* place, const char* str);
   void SafePrintMissing(const char* str, int line, int cnt);
 
-  char* AddString(const std::string& str);
+  char* AddString(const char* str);
 
   void CleanupParser();
   void SetError(std::string const& msg);

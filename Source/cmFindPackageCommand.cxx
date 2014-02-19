@@ -535,8 +535,7 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddFindDefinition(const std::string& var,
-                                             const char* val)
+void cmFindPackageCommand::AddFindDefinition(const char* var, const char* val)
 {
   if(const char* old = this->Makefile->GetDefinition(var))
     {
@@ -553,7 +552,7 @@ void cmFindPackageCommand::AddFindDefinition(const std::string& var,
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::RestoreFindDefinitions()
 {
-  for(std::map<std::string, OriginalDef>::iterator
+  for(std::map<cmStdString, OriginalDef>::iterator
         i = this->OriginalDefs.begin(); i != this->OriginalDefs.end(); ++i)
     {
     OriginalDef const& od = i->second;

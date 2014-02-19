@@ -24,207 +24,8 @@
 
 #include "assert.h"
 
-
 //----------------------------------------------------------------------------
-bool FindSourceFile(cmSourceFile *sf, cmTarget *tgt)
-{
-  std::string e;
-  if((sf)->GetFullPath(&e).empty())
-    {
-    if(!e.empty())
-      {
-      cmake* cm = tgt->GetMakefile()->GetCMakeInstance();
-      cm->IssueMessage(cmake::FATAL_ERROR, e,
-                       tgt->GetBacktrace());
-      }
-    return false;
-    }
-  return true;
-}
-
-//----------------------------------------------------------------------------
-void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
-                     cmTarget *target, cmake *cm)
-{
-  if(!badObjLib.empty())
-    {
-    cmOStringStream e;
-    e << "OBJECT library \"" << target->GetName() << "\" contains:\n";
-    for(std::vector<cmSourceFile*>::const_iterator i = badObjLib.begin();
-        i != badObjLib.end(); ++i)
-      {
-      e << "  " << (*i)->GetLocation().GetName() << "\n";
-      }
-    e << "but may contain only headers and sources that compile.";
-    cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                     target->GetBacktrace());
-    }
-}
-
-struct ObjectSourcesTag {};
-struct CustomCommandsTag {};
-struct ExtraSourcesTag {};
-struct HeaderSourcesTag {};
-struct ExternalObjectsTag {};
-struct IDLSourcesTag {};
-struct ResxTag {};
-struct ModuleDefinitionFileTag {};
-
-template<typename, typename>
-struct IsSameTag
-{
-  enum {
-    Result = false
-  };
-};
-
-template<typename Tag>
-struct IsSameTag<Tag, Tag>
-{
-  enum {
-    Result = true
-  };
-};
-
-template<bool, typename T>
-void doAccept(T&, cmSourceFile*)
-{
-}
-
-template<>
-void doAccept<true,
-              std::vector<cmSourceFile*> >(std::vector<cmSourceFile*>& files,
-                                           cmSourceFile* f)
-{
-  files.push_back(f);
-}
-
-template<>
-void doAccept<true,
-              cmGeneratorTarget::ResxData>(cmGeneratorTarget::ResxData& data,
-                                            cmSourceFile* f)
-{
-  // Build and save the name of the corresponding .h file
-  // This relationship will be used later when building the project files.
-  // Both names would have been auto generated from Visual Studio
-  // where the user supplied the file name and Visual Studio
-  // appended the suffix.
-  std::string resx = f->GetFullPath();
-  std::string hFileName = resx.substr(0, resx.find_last_of(".")) + ".h";
-  data.ExpectedResxHeaders.insert(hFileName);
-  data.ResxSources.push_back(f);
-}
-
-template<>
-void doAccept<true, std::string>(std::string& data, cmSourceFile* f)
-{
-  data = f->GetFullPath();
-}
-
-//----------------------------------------------------------------------------
-template<typename Tag, typename DataType = std::vector<cmSourceFile*> >
-struct TagVisitor
-{
-  DataType& Data;
-  std::vector<cmSourceFile*> BadObjLibFiles;
-  cmTarget *Target;
-  cmGlobalGenerator *GlobalGenerator;
-  cmsys::RegularExpression Header;
-  bool IsObjLib;
-
-  TagVisitor(cmTarget *target, DataType& data)
-    : Data(data), Target(target),
-    GlobalGenerator(target->GetMakefile()
-                          ->GetLocalGenerator()->GetGlobalGenerator()),
-    Header(CM_HEADER_REGEX),
-    IsObjLib(target->GetType() == cmTarget::OBJECT_LIBRARY)
-  {
-  }
-
-  ~TagVisitor()
-  {
-    reportBadObjLib(this->BadObjLibFiles, this->Target,
-                    this->GlobalGenerator->GetCMakeInstance());
-  }
-
-  void Accept(cmSourceFile *sf)
-  {
-    std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
-    if(sf->GetCustomCommand())
-      {
-      doAccept<IsSameTag<Tag, CustomCommandsTag>::Result>(this->Data, sf);
-      }
-    else if(this->Target->GetType() == cmTarget::UTILITY)
-      {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
-      }
-    else if(sf->GetPropertyAsBool("HEADER_FILE_ONLY"))
-      {
-      doAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>(this->Data, sf);
-      }
-    else if(sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
-      {
-      doAccept<IsSameTag<Tag, ExternalObjectsTag>::Result>(this->Data, sf);
-      if(this->IsObjLib)
-        {
-        this->BadObjLibFiles.push_back(sf);
-        }
-      }
-    else if(sf->GetLanguage())
-      {
-      doAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>(this->Data, sf);
-      }
-    else if(ext == "def")
-      {
-      doAccept<IsSameTag<Tag, ModuleDefinitionFileTag>::Result>(this->Data,
-                                                                sf);
-      if(this->IsObjLib)
-        {
-        this->BadObjLibFiles.push_back(sf);
-        }
-      }
-    else if(ext == "idl")
-      {
-      doAccept<IsSameTag<Tag, IDLSourcesTag>::Result>(this->Data, sf);
-      if(this->IsObjLib)
-        {
-        this->BadObjLibFiles.push_back(sf);
-        }
-      }
-    else if(ext == "resx")
-      {
-      doAccept<IsSameTag<Tag, ResxTag>::Result>(this->Data, sf);
-      }
-    else if(this->Header.find(sf->GetFullPath().c_str()))
-      {
-      doAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>(this->Data, sf);
-      }
-    else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
-      {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
-      }
-    else
-      {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
-      if(this->IsObjLib && ext != "txt")
-        {
-        this->BadObjLibFiles.push_back(sf);
-        }
-      }
-  }
-};
-
-//----------------------------------------------------------------------------
-cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
-  SourceFileFlagsConstructed(false),
-  ObjectSourcesDone(false),
-  IDLSourcesDone(false),
-  ExtraSourcesDone(false),
-  HeaderSourcesDone(false),
-  CustomCommandsDone(false),
-  ExternalObjectsDone(false),
-  ResxDone(false),
-  ModuleDefinitionFileDone(false)
+cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
@@ -244,7 +45,7 @@ const char *cmGeneratorTarget::GetName() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
+const char *cmGeneratorTarget::GetProperty(const char *prop) const
 {
   return this->Target->GetProperty(prop);
 }
@@ -261,13 +62,19 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
   return 0;
 }
 
-static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
-                                  const std::string& config,
-                                  cmTarget *headTarget,
+static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
+                                  const char *config, cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   std::vector<std::string>& result,
                                   bool excludeImported)
 {
+  cmTarget* depTgt = mf->FindTargetToUse(name);
+
+  if (!depTgt)
+    {
+    return;
+    }
+
   cmListFileBacktrace lfbt;
 
   if (const char* dirs =
@@ -295,35 +102,11 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
     }
 }
 
-#define IMPLEMENT_VISIT_IMPL(DATA, DATATYPE) \
-if (!this->DATA ## Done) \
-  { \
-  std::vector<cmSourceFile*> sourceFiles; \
-  this->Target->GetSourceFiles(sourceFiles); \
-  TagVisitor<DATA ## Tag DATATYPE> visitor(this->Target, this->DATA); \
-  for(std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
-      si != sourceFiles.end(); ++si) \
-    { \
-    if (!FindSourceFile(*si, this->Target)) \
-      { \
-      break; \
-      } \
-    visitor.Accept(*si); \
-    } \
-  this->DATA ## Done = true; \
-  } \
-data = this->DATA;
-
-#define IMPLEMENT_VISIT(DATA) \
-  IMPLEMENT_VISIT_IMPL(DATA, ) \
-
-#define COMMA ,
-
 //----------------------------------------------------------------------------
 void
-cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &data) const
+cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &objs) const
 {
-  IMPLEMENT_VISIT(ObjectSources);
+  objs = this->ObjectSources;
 }
 
 //----------------------------------------------------------------------------
@@ -352,62 +135,58 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile*>& data) const
+void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
 {
-  IMPLEMENT_VISIT(IDLSources);
+  srcs = this->ResxSources;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile*>& srcs) const
+{
+  srcs = this->IDLSources;
 }
 
 //----------------------------------------------------------------------------
 void
-cmGeneratorTarget::GetHeaderSources(std::vector<cmSourceFile*>& data) const
+cmGeneratorTarget::GetHeaderSources(std::vector<cmSourceFile*>& srcs) const
 {
-  IMPLEMENT_VISIT(HeaderSources);
+  srcs = this->HeaderSources;
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile*>& data) const
+void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile*>& srcs) const
 {
-  IMPLEMENT_VISIT(ExtraSources);
-}
-
-//----------------------------------------------------------------------------
-void
-cmGeneratorTarget::GetCustomCommands(std::vector<cmSourceFile*>& data) const
-{
-  IMPLEMENT_VISIT(CustomCommands);
+  srcs = this->ExtraSources;
 }
 
 //----------------------------------------------------------------------------
 void
-cmGeneratorTarget::GetExternalObjects(std::vector<cmSourceFile*>& data) const
+cmGeneratorTarget::GetCustomCommands(std::vector<cmSourceFile*>& srcs) const
 {
-  IMPLEMENT_VISIT(ExternalObjects);
+  srcs = this->CustomCommands;
 }
 
 //----------------------------------------------------------------------------
 void
 cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs) const
 {
-  ResxData data = this->Resx;
-  IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
-  srcs = data.ExpectedResxHeaders;
+  srcs = this->ExpectedResxHeaders;
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
+void
+cmGeneratorTarget::GetExternalObjects(std::vector<cmSourceFile*>& srcs) const
 {
-  ResxData data = this->Resx;
-  IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
-  srcs = data.ResxSources;
+  srcs = this->ExternalObjects;
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
-                                              const std::string& config) const
+bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
+                                                 const char *config) const
 {
   assert(this->GetType() != cmTarget::INTERFACE_LIBRARY);
   std::string config_upper;
-  if(!config.empty())
+  if(config && *config)
     {
     config_upper = cmSystemTools::UpperCase(config);
     }
@@ -434,7 +213,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                 = this->Target->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
     std::vector<std::string> result;
-    for (std::set<std::string>::const_iterator
+    for (std::set<cmStdString>::const_iterator
         it = this->Target->GetSystemIncludeDirectories().begin();
         it != this->Target->GetSystemIncludeDirectories().end(); ++it)
       {
@@ -445,25 +224,26 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                           &dagChecker), result);
       }
 
-    std::set<cmTarget*> uniqueDeps;
+    std::set<cmStdString> uniqueDeps;
     for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
         li != impl->Libraries.end(); ++li)
       {
-      cmTarget* tgt = this->Makefile->FindTargetToUse(*li);
-      if (!tgt)
+      if (uniqueDeps.insert(*li).second)
         {
-        continue;
-        }
+        cmTarget* tgt = this->Makefile->FindTargetToUse(*li);
 
-      if (uniqueDeps.insert(tgt).second)
-        {
-        handleSystemIncludesDep(this->Makefile, tgt, config, this->Target,
+        if (!tgt)
+          {
+          continue;
+          }
+
+        handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
                                 &dagChecker, result, excludeImported);
 
-        std::vector<cmTarget*> deps;
-        tgt->GetTransitivePropertyTargets(config, this->Target, deps);
+        std::vector<std::string> deps;
+        tgt->GetTransitivePropertyLinkLibraries(config, this->Target, deps);
 
-        for(std::vector<cmTarget*>::const_iterator di = deps.begin();
+        for(std::vector<std::string>::const_iterator di = deps.begin();
             di != deps.end(); ++di)
           {
           if (uniqueDeps.insert(*di).second)
@@ -474,7 +254,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
           }
         }
       }
-    std::set<std::string> unique;
+    std::set<cmStdString> unique;
     for(std::vector<std::string>::iterator li = result.begin();
         li != result.end(); ++li)
       {
@@ -482,7 +262,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       unique.insert(*li);
       }
     result.clear();
-    for(std::set<std::string>::iterator li = unique.begin();
+    for(std::set<cmStdString>::iterator li = unique.begin();
         li != unique.end(); ++li)
       {
       result.push_back(*li);
@@ -498,7 +278,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
+bool cmGeneratorTarget::GetPropertyAsBool(const char *prop) const
 {
   return this->Target->GetPropertyAsBool(prop);
 }
@@ -507,6 +287,102 @@ bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 {
   this->Target->GetSourceFiles(files);
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::ClassifySources()
+{
+  cmsys::RegularExpression header(CM_HEADER_REGEX);
+
+  cmTarget::TargetType targetType = this->Target->GetType();
+  bool isObjLib = targetType == cmTarget::OBJECT_LIBRARY;
+
+  std::vector<cmSourceFile*> badObjLib;
+  std::vector<cmSourceFile*> sources;
+  this->Target->GetSourceFiles(sources);
+  for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
+      si != sources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
+    if(sf->GetCustomCommand())
+      {
+      this->CustomCommands.push_back(sf);
+      }
+    else if(targetType == cmTarget::UTILITY)
+      {
+      this->ExtraSources.push_back(sf);
+      }
+    else if(sf->GetPropertyAsBool("HEADER_FILE_ONLY"))
+      {
+      this->HeaderSources.push_back(sf);
+      }
+    else if(sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
+      {
+      this->ExternalObjects.push_back(sf);
+      if(isObjLib) { badObjLib.push_back(sf); }
+      }
+    else if(sf->GetLanguage())
+      {
+      this->ObjectSources.push_back(sf);
+      }
+    else if(ext == "def")
+      {
+      this->ModuleDefinitionFile = sf->GetFullPath();
+      if(isObjLib) { badObjLib.push_back(sf); }
+      }
+    else if(ext == "idl")
+      {
+      this->IDLSources.push_back(sf);
+      if(isObjLib) { badObjLib.push_back(sf); }
+      }
+    else if(ext == "resx")
+      {
+      // Build and save the name of the corresponding .h file
+      // This relationship will be used later when building the project files.
+      // Both names would have been auto generated from Visual Studio
+      // where the user supplied the file name and Visual Studio
+      // appended the suffix.
+      std::string resx = sf->GetFullPath();
+      std::string hFileName = resx.substr(0, resx.find_last_of(".")) + ".h";
+      this->ExpectedResxHeaders.insert(hFileName);
+      this->ResxSources.push_back(sf);
+      }
+    else if(header.find(sf->GetFullPath().c_str()))
+      {
+      this->HeaderSources.push_back(sf);
+      }
+    else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
+      {
+      // We only get here if a source file is not an external object
+      // and has an extension that is listed as an ignored file type.
+      // No message or diagnosis should be given.
+      this->ExtraSources.push_back(sf);
+      }
+    else
+      {
+      this->ExtraSources.push_back(sf);
+      if(isObjLib && ext != "txt")
+        {
+        badObjLib.push_back(sf);
+        }
+      }
+    }
+
+  if(!badObjLib.empty())
+    {
+    cmOStringStream e;
+    e << "OBJECT library \"" << this->Target->GetName() << "\" contains:\n";
+    for(std::vector<cmSourceFile*>::iterator i = badObjLib.begin();
+        i != badObjLib.end(); ++i)
+      {
+      e << "  " << (*i)->GetLocation().GetName() << "\n";
+      }
+    e << "but may contain only headers and sources that compile.";
+    this->GlobalGenerator->GetCMakeInstance()
+      ->IssueMessage(cmake::FATAL_ERROR, e.str(),
+                     this->Target->GetBacktrace());
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -562,14 +438,6 @@ void cmGeneratorTarget::LookupObjectLibraries()
 }
 
 //----------------------------------------------------------------------------
-std::string cmGeneratorTarget::GetModuleDefinitionFile() const
-{
-  std::string data;
-  IMPLEMENT_VISIT_IMPL(ModuleDefinitionFile, COMMA std::string)
-  return data;
-}
-
-//----------------------------------------------------------------------------
 void
 cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs) const
 {
@@ -606,7 +474,7 @@ private:
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;
-  typedef std::map<std::string, cmSourceFile*> NameMapType;
+  typedef std::map<cmStdString, cmSourceFile*> NameMapType;
   NameMapType NameMap;
 
   void QueueSource(cmSourceFile* sf);
@@ -754,7 +622,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         {
         // This is really only for compatibility so we do not need to
         // worry about configuration names and output names.
-        std::string tLocation = t->GetLocation("");
+        std::string tLocation = t->GetLocation(0);
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         std::string depLocation = cmSystemTools::GetFilenamePath(dep);
         depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
@@ -814,7 +682,7 @@ cmTargetTraceDependencies
       {
       const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
                                                               = ge.Parse(*cli);
-      cge->Evaluate(this->Makefile, "", true);
+      cge->Evaluate(this->Makefile, 0, true);
       std::set<cmTarget*> geTargets = cge->GetTargets();
       for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
           it != geTargets.end(); ++it)
@@ -875,11 +743,11 @@ void cmGeneratorTarget::TraceDependencies()
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetAppleArchs(const std::string& config,
+void cmGeneratorTarget::GetAppleArchs(const char* config,
                              std::vector<std::string>& archVec) const
 {
   const char* archs = 0;
-  if(!config.empty())
+  if(config && *config)
     {
     std::string defVarName = "OSX_ARCHITECTURES_";
     defVarName += cmSystemTools::UpperCase(config);
@@ -916,14 +784,13 @@ const char* cmGeneratorTarget::GetCreateRuleVariable() const
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmGeneratorTarget::GetIncludeDirectories(const std::string& config) const
+cmGeneratorTarget::GetIncludeDirectories(const char *config) const
 {
   return this->Target->GetIncludeDirectories(config);
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GenerateTargetManifest(
-                                              const std::string& config) const
+void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
 {
   if (this->Target->IsImported())
     {
@@ -966,35 +833,35 @@ void cmGeneratorTarget::GenerateTargetManifest(
     f = dir;
     f += "/";
     f += name;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(config? config:"", f);
     }
   if(!soName.empty())
     {
     f = dir;
     f += "/";
     f += soName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(config? config:"", f);
     }
   if(!realName.empty())
     {
     f = dir;
     f += "/";
     f += realName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(config? config:"", f);
     }
   if(!pdbName.empty())
     {
     f = dir;
     f += "/";
     f += pdbName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(config? config:"", f);
     }
   if(!impName.empty())
     {
     f = this->Target->GetDirectory(config, true);
     f += "/";
     f += impName;
-    gg->AddToManifest(config, f);
+    gg->AddToManifest(config? config:"", f);
     }
 }
 
@@ -1008,98 +875,4 @@ bool cmStrictTargetComparison::operator()(cmTarget const* t1,
                   t2->GetMakefile()->GetStartOutputDirectory()) < 0;
     }
   return nameResult < 0;
-}
-
-//----------------------------------------------------------------------------
-struct cmGeneratorTarget::SourceFileFlags
-cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
-{
-  struct SourceFileFlags flags;
-  this->ConstructSourceFileFlags();
-  std::map<cmSourceFile const*, SourceFileFlags>::iterator si =
-    this->SourceFlagsMap.find(sf);
-  if(si != this->SourceFlagsMap.end())
-    {
-    flags = si->second;
-    }
-  else
-    {
-    // Handle the MACOSX_PACKAGE_LOCATION property on source files that
-    // were not listed in one of the other lists.
-    if(const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION"))
-      {
-      flags.MacFolder = location;
-      if(strcmp(location, "Resources") == 0)
-        {
-        flags.Type = cmGeneratorTarget::SourceFileTypeResource;
-        }
-      else
-        {
-        flags.Type = cmGeneratorTarget::SourceFileTypeMacContent;
-        }
-      }
-    }
-  return flags;
-}
-
-//----------------------------------------------------------------------------
-void cmGeneratorTarget::ConstructSourceFileFlags() const
-{
-  if(this->SourceFileFlagsConstructed)
-    {
-    return;
-    }
-  this->SourceFileFlagsConstructed = true;
-
-  // Process public headers to mark the source files.
-  if(const char* files = this->Target->GetProperty("PUBLIC_HEADER"))
-    {
-    std::vector<std::string> relFiles;
-    cmSystemTools::ExpandListArgument(files, relFiles);
-    for(std::vector<std::string>::iterator it = relFiles.begin();
-        it != relFiles.end(); ++it)
-      {
-      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
-        {
-        SourceFileFlags& flags = this->SourceFlagsMap[sf];
-        flags.MacFolder = "Headers";
-        flags.Type = cmGeneratorTarget::SourceFileTypePublicHeader;
-        }
-      }
-    }
-
-  // Process private headers after public headers so that they take
-  // precedence if a file is listed in both.
-  if(const char* files = this->Target->GetProperty("PRIVATE_HEADER"))
-    {
-    std::vector<std::string> relFiles;
-    cmSystemTools::ExpandListArgument(files, relFiles);
-    for(std::vector<std::string>::iterator it = relFiles.begin();
-        it != relFiles.end(); ++it)
-      {
-      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
-        {
-        SourceFileFlags& flags = this->SourceFlagsMap[sf];
-        flags.MacFolder = "PrivateHeaders";
-        flags.Type = cmGeneratorTarget::SourceFileTypePrivateHeader;
-        }
-      }
-    }
-
-  // Mark sources listed as resources.
-  if(const char* files = this->Target->GetProperty("RESOURCE"))
-    {
-    std::vector<std::string> relFiles;
-    cmSystemTools::ExpandListArgument(files, relFiles);
-    for(std::vector<std::string>::iterator it = relFiles.begin();
-        it != relFiles.end(); ++it)
-      {
-      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
-        {
-        SourceFileFlags& flags = this->SourceFlagsMap[sf];
-        flags.MacFolder = "Resources";
-        flags.Type = cmGeneratorTarget::SourceFileTypeResource;
-        }
-      }
-    }
 }

@@ -37,10 +37,9 @@ protected:
   virtual const char* GetPackagingInstallPrefix();
   virtual const char* GetOutputExtension() { return ".dmg"; }
 
-  //bool CopyCreateResourceFile(const std::string& name,
-  //                            const std::string& dir);
-  bool CopyResourcePlistFile(const std::string& name, const char* dir,
-    const std::string& outputFileName = 0, bool copyOnly = false);
+  //bool CopyCreateResourceFile(const char* name, const char* dir);
+  bool CopyResourcePlistFile(const char* name, const char* dir,
+    const char* outputFileName = 0, bool copyOnly = false);
   std::string InstallPrefix;
 };
 
