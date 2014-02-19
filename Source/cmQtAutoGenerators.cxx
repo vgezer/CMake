@@ -62,10 +62,10 @@ static bool requiresMocing(const std::string& text, std::string &macroName)
 static std::string findMatchingHeader(const std::string& absPath,
                                       const std::string& mocSubDir,
                                       const std::string& basename,
-                              const std::vector<std::string>& headerExtensions)
+                              const std::set<std::string>& headerExtensions)
 {
   std::string header;
-  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::set<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
@@ -105,7 +105,7 @@ static std::string extractSubDir(const std::string& absPath,
 
 static void copyTargetProperty(cmTarget* destinationTarget,
                                cmTarget* sourceTarget,
-                               const char* propertyName)
+                               const std::string& propertyName)
 {
   const char* propertyValue = sourceTarget->GetProperty(propertyName);
   if (propertyValue)
@@ -306,7 +306,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 }
 
 static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
-                                                const char * config,
+                                                const std::string& config,
                                                 std::string &incs,
                                                 std::string &defs)
 {
@@ -610,7 +610,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(""));
     }
   else if (strcmp(qtVersion, "4") == 0)
     {
@@ -621,7 +621,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable", qt4Moc->GetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable", qt4Moc->GetLocation(""));
     }
   else
     {
@@ -660,7 +660,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
         ++o;
         }
       if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                  cmStrCmp(o)) != cmArrayEnd(valueOptions))
+                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
         {
         assert(existingIt + 1 != opts.end());
         *(existingIt + 1) = *(it + 1);
@@ -697,7 +697,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
 {
   cmMakefile *makefile = target->GetMakefile();
 
-  std::set<cmStdString> skipped;
+  std::set<std::string> skipped;
   std::vector<std::string> skipVec;
   cmSystemTools::ExpandListArgument(this->SkipUic.c_str(), skipVec);
 
@@ -782,7 +782,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
       }
     else
       {
-      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(0));
+      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(""));
       }
     }
   else if (strcmp(qtVersion, "4") == 0)
@@ -794,7 +794,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
                           targetName);
       return;
       }
-    makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(0));
+    makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(""));
     }
   else
     {
@@ -831,7 +831,7 @@ void cmQtAutoGenerators::MergeRccOptions(std::vector<std::string> &opts,
         ++o;
         }
       if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                  cmStrCmp(o)) != cmArrayEnd(valueOptions))
+                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
         {
         assert(existingIt + 1 != opts.end());
         *(existingIt + 1) = *(it + 1);
@@ -931,7 +931,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
                           targetName);
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(""));
     }
   else if (strcmp(qtVersion, "4") == 0)
     {
@@ -942,7 +942,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
                           targetName);
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(""));
     }
   else
     {
@@ -1280,7 +1280,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   std::vector<std::string> sourceFiles;
   cmSystemTools::ExpandListArgument(this->Sources, sourceFiles);
 
-  const std::vector<std::string>& headerExtensions =
+  const std::set<std::string>& headerExtensions =
                                                makefile->GetHeaderExtensions();
 
   std::map<std::string, std::string> includedUis;
@@ -1435,7 +1435,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
 
 void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
-                              const std::vector<std::string>& headerExtensions,
+                              const std::set<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs,
                               std::map<std::string, std::string> &includedUis)
 {
@@ -1623,7 +1623,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
 
 
 void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
-                              const std::vector<std::string>& headerExtensions,
+                              const std::set<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs,
                               std::map<std::string, std::string>& includedUis)
 {
@@ -1802,7 +1802,7 @@ void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
 
 void
 cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
-                              const std::vector<std::string>& headerExtensions,
+                              const std::set<std::string>& headerExtensions,
                               std::set<std::string>& absHeaders)
 {
   // search for header files and private header files we may need to moc:
@@ -1811,7 +1811,7 @@ cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
 
-  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::set<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
@@ -1822,7 +1822,7 @@ cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
       break;
       }
     }
-  for(std::vector<std::string>::const_iterator ext = headerExtensions.begin();
+  for(std::set<std::string>::const_iterator ext = headerExtensions.begin();
       ext != headerExtensions.end();
       ++ext)
     {
@@ -1895,7 +1895,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                                            |cmsysTerminal_Color_ForegroundBold,
                                      msg.c_str(), true, this->ColorOutput);
 
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->MocExecutable);
     for (std::list<std::string>::const_iterator it = this->MocIncludes.begin();
          it != this->MocIncludes.end();
@@ -1924,7 +1924,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
 
     if (this->Verbose)
       {
-      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
           cmdIt != command.end();
           ++cmdIt)
         {
@@ -1971,7 +1971,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& path,
                                           |cmsysTerminal_Color_ForegroundBold,
                                       msg.c_str(), true, this->ColorOutput);
 
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->UicExecutable);
 
     std::vector<std::string> opts = this->UicTargetOptions;
@@ -1996,7 +1996,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& path,
 
     if (this->Verbose)
       {
-      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
           cmdIt != command.end();
           ++cmdIt)
         {
@@ -2034,7 +2034,7 @@ bool cmQtAutoGenerators::GenerateQrc()
       {
       continue;
       }
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->RccExecutable);
 
     std::string basename = cmsys::SystemTools::
@@ -2068,7 +2068,7 @@ bool cmQtAutoGenerators::GenerateQrc()
 
       if (this->Verbose)
         {
-        for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+        for(std::vector<std::string>::const_iterator cmdIt = command.begin();
             cmdIt != command.end();
             ++cmdIt)
           {
@@ -2092,7 +2092,7 @@ bool cmQtAutoGenerators::GenerateQrc()
   return true;
 }
 
-std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
+std::string cmQtAutoGenerators::Join(const std::set<std::string>& lst,
                               char separator)
 {
     if (lst.empty())
@@ -2101,7 +2101,7 @@ std::string cmQtAutoGenerators::Join(const std::vector<std::string>& lst,
       }
 
     std::string result;
-    for (std::vector<std::string>::const_iterator it = lst.begin();
+    for (std::set<std::string>::const_iterator it = lst.begin();
          it != lst.end();
          ++it)
       {

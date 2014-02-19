@@ -65,13 +65,13 @@ protected:
   cmMakefile* GetMakefile() const
   { return this->Makefile; }
 
-  const char* GetConfigName() const;
+  std::string const& GetConfigName() const;
 
   std::string LanguageCompilerRule(const std::string& lang) const
   { return lang + "_COMPILER"; }
 
-  const char* GetFeature(const char* feature);
-  bool GetFeatureAsBool(const char* feature);
+  const char* GetFeature(const std::string& feature);
+  bool GetFeatureAsBool(const std::string& feature);
   void AddFeatureFlags(std::string& flags, const char* lang);
 
   /**
@@ -140,7 +140,7 @@ protected:
   MacOSXContentGeneratorType* MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   cmOSXBundleGenerator* OSXBundleGenerator;
-  std::set<cmStdString> MacContentFolders;
+  std::set<std::string> MacContentFolders;
 
   void addPoolNinjaVariable(const char* pool_property,
                             cmTarget* target,

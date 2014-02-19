@@ -342,21 +342,21 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   this->Target->GetLanguages(languages);
   // put the compiler in the rules.make file so that if it changes
   // things rebuild
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
-    cmStdString compiler = "CMAKE_";
+    std::string compiler = "CMAKE_";
     compiler += *l;
     compiler += "_COMPILER";
     *this->FlagFileStream << "# compile " << l->c_str() << " with " <<
       this->Makefile->GetSafeDefinition(compiler.c_str()) << "\n";
     }
 
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
     *this->FlagFileStream << *l << "_FLAGS = " << this->GetFlags(*l) << "\n\n";
@@ -1514,7 +1514,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
       }
 
     // Make sure the extra files are built.
-    for(std::set<cmStdString>::const_iterator i = this->ExtraFiles.begin();
+    for(std::set<std::string>::const_iterator i = this->ExtraFiles.begin();
         i != this->ExtraFiles.end(); ++i)
       {
       depends.push_back(*i);
@@ -1544,7 +1544,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
     return std::string();
     }
 
- std::set<cmStdString> emitted;
+ std::set<std::string> emitted;
 #ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
   emitted.insert("/System/Library/Frameworks");
 #endif
@@ -1650,9 +1650,10 @@ void cmMakefileTargetGenerator
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  if(!def.empty())
     {
-    depends.push_back(this->GeneratorTarget->ModuleDefinitionFile);
+    depends.push_back(def);
     }
 
   // Add user-specified dependencies.
@@ -1664,7 +1665,8 @@ void cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmMakefileTargetGenerator::GetLinkRule(const char* linkRuleVar)
+std::string cmMakefileTargetGenerator::GetLinkRule(
+                                              const std::string& linkRuleVar)
 {
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
   if(this->Target->HasImplibGNUtoMS())
@@ -2019,7 +2021,8 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 {
-  if(this->GeneratorTarget->ModuleDefinitionFile.empty())
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  if(def.empty())
     {
     return;
     }
@@ -2035,19 +2038,18 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   // Append the flag and value.  Use ConvertToLinkReference to help
   // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
-  flag += (this->LocalGenerator->ConvertToLinkReference(
-             this->GeneratorTarget->ModuleDefinitionFile.c_str()));
+  flag += (this->LocalGenerator->ConvertToLinkReference(def.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
 }
 
 //----------------------------------------------------------------------------
-const char* cmMakefileTargetGenerator::GetFeature(const char* feature)
+const char* cmMakefileTargetGenerator::GetFeature(const std::string& feature)
 {
   return this->Target->GetFeature(feature, this->ConfigName);
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefileTargetGenerator::GetFeatureAsBool(const char* feature)
+bool cmMakefileTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
   return cmSystemTools::IsOn(this->GetFeature(feature));
 }

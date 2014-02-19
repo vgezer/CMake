@@ -45,8 +45,8 @@ class cmMakefile::Internals
 {
 public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
-  std::stack<std::set<cmStdString> > VarInitStack;
-  std::stack<std::set<cmStdString> > VarUsageStack;
+  std::stack<std::set<std::string> > VarInitStack;
+  std::stack<std::set<std::string> > VarUsageStack;
   bool IsSourceFileTryCompile;
 };
 
@@ -54,7 +54,7 @@ public:
 cmMakefile::cmMakefile(): Internal(new Internals)
 {
   const cmDefinitions& defs = cmDefinitions();
-  const std::set<cmStdString> globalKeys = defs.LocalKeys();
+  const std::set<std::string> globalKeys = defs.LocalKeys();
   this->Internal->VarStack.push(defs);
   this->Internal->VarInitStack.push(globalKeys);
   this->Internal->VarUsageStack.push(globalKeys);
@@ -74,25 +74,25 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   // these are used to find files when the extension
   // is not given
   // The "c" extension MUST precede the "C" extension.
-  this->SourceFileExtensions.push_back( "c" );
-  this->SourceFileExtensions.push_back( "C" );
+  this->SourceFileExtensions.insert( "c" );
+  this->SourceFileExtensions.insert( "C" );
 
-  this->SourceFileExtensions.push_back( "c++" );
-  this->SourceFileExtensions.push_back( "cc" );
-  this->SourceFileExtensions.push_back( "cpp" );
-  this->SourceFileExtensions.push_back( "cxx" );
-  this->SourceFileExtensions.push_back( "m" );
-  this->SourceFileExtensions.push_back( "M" );
-  this->SourceFileExtensions.push_back( "mm" );
+  this->SourceFileExtensions.insert( "c++" );
+  this->SourceFileExtensions.insert( "cc" );
+  this->SourceFileExtensions.insert( "cpp" );
+  this->SourceFileExtensions.insert( "cxx" );
+  this->SourceFileExtensions.insert( "m" );
+  this->SourceFileExtensions.insert( "M" );
+  this->SourceFileExtensions.insert( "mm" );
 
-  this->HeaderFileExtensions.push_back( "h" );
-  this->HeaderFileExtensions.push_back( "hh" );
-  this->HeaderFileExtensions.push_back( "h++" );
-  this->HeaderFileExtensions.push_back( "hm" );
-  this->HeaderFileExtensions.push_back( "hpp" );
-  this->HeaderFileExtensions.push_back( "hxx" );
-  this->HeaderFileExtensions.push_back( "in" );
-  this->HeaderFileExtensions.push_back( "txx" );
+  this->HeaderFileExtensions.insert( "h" );
+  this->HeaderFileExtensions.insert( "hh" );
+  this->HeaderFileExtensions.insert( "h++" );
+  this->HeaderFileExtensions.insert( "hm" );
+  this->HeaderFileExtensions.insert( "hpp" );
+  this->HeaderFileExtensions.insert( "hxx" );
+  this->HeaderFileExtensions.insert( "in" );
+  this->HeaderFileExtensions.insert( "txx" );
 
   this->DefineFlags = " ";
   this->LocalGenerator = 0;
@@ -203,7 +203,7 @@ cmMakefile::~cmMakefile()
     {
     delete *i;
     }
-  for(std::map<cmStdString, cmTest*>::iterator i = this->Tests.begin();
+  for(std::map<std::string, cmTest*>::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
     delete i->second;
@@ -247,10 +247,10 @@ void cmMakefile::PrintStringVector(const char* s,
 
 void cmMakefile
 ::PrintStringVector(const char* s,
-                    const std::vector<std::pair<cmStdString, bool> >& v) const
+                    const std::vector<std::pair<std::string, bool> >& v) const
 {
   std::cout << s << ": ( \n";
-  for(std::vector<std::pair<cmStdString, bool> >::const_iterator i
+  for(std::vector<std::pair<std::string, bool> >::const_iterator i
         = v.begin(); i != v.end(); ++i)
     {
     std::cout << i->first.c_str() << " " << i->second;
@@ -1102,7 +1102,7 @@ cmMakefile::UpdateOutputToSourceMap(std::string const& output,
 
 //----------------------------------------------------------------------------
 cmSourceFile*
-cmMakefile::AddCustomCommandToOutput(const char* output,
+cmMakefile::AddCustomCommandToOutput(const std::string& output,
                                      const std::vector<std::string>& depends,
                                      const char* main_dependency,
                                      const cmCustomCommandLines& commandLines,
@@ -1187,7 +1187,7 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::AddUtilityCommand(const char* utilityName,
+void cmMakefile::AddUtilityCommand(const std::string& utilityName,
                                    bool excludeFromAll,
                                    const std::vector<std::string>& depends,
                                    const char* workingDirectory,
@@ -1226,7 +1226,7 @@ void cmMakefile::AddUtilityCommand(const char* utilityName,
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddUtilityCommand(const char* utilityName,
+cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
                               const char* workingDirectory,
                               const std::vector<std::string>& depends,
@@ -1453,7 +1453,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
   return true;
 }
 
-void cmMakefile::AddLinkLibrary(const char* lib,
+void cmMakefile::AddLinkLibrary(const std::string& lib,
                                 cmTarget::LinkLibraryType llt)
 {
   cmTarget::LibraryID tmp;
@@ -1462,15 +1462,15 @@ void cmMakefile::AddLinkLibrary(const char* lib,
   this->LinkLibraries.push_back(tmp);
 }
 
-void cmMakefile::AddLinkLibraryForTarget(const char *target,
-                                         const char* lib,
+void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
+                                         const std::string& lib,
                                          cmTarget::LinkLibraryType llt)
 {
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
     {
     cmTarget* tgt =
-      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(0,lib);
+      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(lib);
     if(tgt)
       {
       // if it is not a static or shared library then you can not link to it
@@ -1500,8 +1500,8 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
     }
 }
 
-void cmMakefile::AddLinkDirectoryForTarget(const char *target,
-                                           const char* d)
+void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
+                                           const std::string& d)
 {
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
@@ -1520,46 +1520,37 @@ void cmMakefile::AddLinkDirectoryForTarget(const char *target,
     {
     cmSystemTools::Error
       ("Attempt to add link directories to non-existent target: ",
-       target, " for directory ", d);
+       target.c_str(), " for directory ", d.c_str());
     }
 }
 
-void cmMakefile::AddLinkLibrary(const char* lib)
+void cmMakefile::AddLinkLibrary(const std::string& lib)
 {
   this->AddLinkLibrary(lib,cmTarget::GENERAL);
 }
 
-void cmMakefile::AddLinkDirectory(const char* dir)
+void cmMakefile::AddLinkDirectory(const std::string& dir)
 {
   // Don't add a link directory that is already present.  Yes, this
   // linear search results in n^2 behavior, but n won't be getting
   // much bigger than 20.  We cannot use a set because of order
   // dependency of the link search path.
 
-  if(!dir)
+  if(dir.empty())
     {
     return;
     }
+  std::string newdir = dir;
   // remove trailing slashes
-  if(dir[strlen(dir)-1] == '/')
+  if(*dir.rbegin() == '/')
     {
-    std::string newdir = dir;
-    newdir = newdir.substr(0, newdir.size()-1);
-    if(std::find(this->LinkDirectories.begin(),
-                 this->LinkDirectories.end(),
-                 newdir.c_str()) == this->LinkDirectories.end())
-      {
-      this->LinkDirectories.push_back(newdir);
-      }
+    newdir = dir.substr(0, dir.size()-1);
     }
-  else
+  if(std::find(this->LinkDirectories.begin(),
+               this->LinkDirectories.end(), newdir)
+      == this->LinkDirectories.end())
     {
-    if(std::find(this->LinkDirectories.begin(),
-                 this->LinkDirectories.end(), dir)
-       == this->LinkDirectories.end())
-      {
-      this->LinkDirectories.push_back(dir);
-      }
+    this->LinkDirectories.push_back(dir);
     }
 }
 
@@ -1656,7 +1647,7 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
     }
 }
 
-void cmMakefile::AddSubDirectory(const char* sub,
+void cmMakefile::AddSubDirectory(const std::string& sub,
                                  bool excludeFromAll, bool preorder)
 {
   // the source path must be made full if it isn't already
@@ -1683,7 +1674,8 @@ void cmMakefile::AddSubDirectory(const char* sub,
 }
 
 
-void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
+void cmMakefile::AddSubDirectory(const std::string& srcPath,
+                                 const std::string& binPath,
                                  bool excludeFromAll, bool preorder,
                                  bool immediate)
 {
@@ -1753,9 +1745,9 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
 
 //----------------------------------------------------------------------------
 void
-cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
+cmMakefile::AddSystemIncludeDirectories(const std::set<std::string> &incs)
 {
-  for(std::set<cmStdString>::const_iterator li = incs.begin();
+  for(std::set<std::string>::const_iterator li = incs.begin();
       li != incs.end(); ++li)
     {
     this->SystemIncludeDirectories.insert(*li);
@@ -1769,7 +1761,7 @@ cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
     }
 }
 
-void cmMakefile::AddDefinition(const char* name, const char* value)
+void cmMakefile::AddDefinition(const std::string& name, const char* value)
 {
   if (!value )
     {
@@ -1798,14 +1790,14 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 }
 
 
-void cmMakefile::AddCacheDefinition(const char* name, const char* value,
+void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     const char* doc,
                                     cmCacheManager::CacheEntryType type,
                                     bool force)
 {
   const char* val = value;
   cmCacheManager::CacheIterator it =
-    this->GetCacheManager()->GetCacheIterator(name);
+    this->GetCacheManager()->GetCacheIterator(name.c_str());
   if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
      it.Initialized())
     {
@@ -1845,7 +1837,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 }
 
 
-void cmMakefile::AddDefinition(const char* name, bool value)
+void cmMakefile::AddDefinition(const std::string& name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
   if (this->Internal->VarUsageStack.size() &&
@@ -1872,20 +1864,20 @@ void cmMakefile::CheckForUnusedVariables() const
     return;
     }
   const cmDefinitions& defs = this->Internal->VarStack.top();
-  const std::set<cmStdString>& locals = defs.LocalKeys();
-  std::set<cmStdString>::const_iterator it = locals.begin();
+  const std::set<std::string>& locals = defs.LocalKeys();
+  std::set<std::string>::const_iterator it = locals.begin();
   for (; it != locals.end(); ++it)
     {
     this->CheckForUnused("out of scope", it->c_str());
     }
 }
 
-void cmMakefile::MarkVariableAsUsed(const char* var)
+void cmMakefile::MarkVariableAsUsed(const std::string& var)
 {
   this->Internal->VarUsageStack.top().insert(var);
 }
 
-bool cmMakefile::VariableInitialized(const char* var) const
+bool cmMakefile::VariableInitialized(const std::string& var) const
 {
   if(this->Internal->VarInitStack.top().find(var) !=
       this->Internal->VarInitStack.top().end())
@@ -1895,7 +1887,7 @@ bool cmMakefile::VariableInitialized(const char* var) const
   return false;
 }
 
-bool cmMakefile::VariableUsed(const char* var) const
+bool cmMakefile::VariableUsed(const std::string& var) const
 {
   if(this->Internal->VarUsageStack.top().find(var) !=
       this->Internal->VarUsageStack.top().end())
@@ -1905,11 +1897,12 @@ bool cmMakefile::VariableUsed(const char* var) const
   return false;
 }
 
-void cmMakefile::CheckForUnused(const char* reason, const char* name) const
+void cmMakefile::CheckForUnused(const char* reason,
+                                const std::string& name) const
 {
   if (this->WarnUnused && !this->VariableUsed(name))
     {
-    cmStdString path;
+    std::string path;
     cmListFileBacktrace bt;
     if (this->CallStack.size())
       {
@@ -1943,7 +1936,7 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
     }
 }
 
-void cmMakefile::RemoveDefinition(const char* name)
+void cmMakefile::RemoveDefinition(const std::string& name)
 {
   this->Internal->VarStack.top().Set(name, 0);
   if (this->Internal->VarUsageStack.size() &&
@@ -1963,7 +1956,7 @@ void cmMakefile::RemoveDefinition(const char* name)
 #endif
 }
 
-void cmMakefile::RemoveCacheDefinition(const char* name)
+void cmMakefile::RemoveCacheDefinition(const std::string& name)
 {
   this->GetCacheManager()->RemoveCacheEntry(name);
 }
@@ -1995,7 +1988,7 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 }
 
 
-void cmMakefile::AddAlias(const char* lname, cmTarget *tgt)
+void cmMakefile::AddAlias(const std::string& lname, cmTarget *tgt)
 {
   this->AliasTargets[lname] = tgt;
   this->LocalGenerator->GetGlobalGenerator()->AddAlias(lname, tgt);
@@ -2047,7 +2040,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
+cmMakefile::AddNewTarget(cmTarget::TargetType type, const std::string& name)
 {
   cmTargets::iterator it =
     this->Targets.insert(cmTargets::value_type(name, cmTarget())).first;
@@ -2059,9 +2052,8 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
 }
 
 cmSourceFile*
-cmMakefile::LinearGetSourceFileWithOutput(const char *cname) const
+cmMakefile::LinearGetSourceFileWithOutput(const std::string& name) const
 {
-  std::string name = cname;
   std::string out;
 
   // look through all the source files that have custom commands
@@ -2095,15 +2087,14 @@ cmMakefile::LinearGetSourceFileWithOutput(const char *cname) const
   return 0;
 }
 
-cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname) const
+cmSourceFile *cmMakefile::GetSourceFileWithOutput(
+                                                const std::string& name) const
 {
-  std::string name = cname;
-
   // If the queried path is not absolute we use the backward compatible
   // linear-time search for an output with a matching suffix.
-  if(!cmSystemTools::FileIsFullPath(cname))
+  if(!cmSystemTools::FileIsFullPath(name.c_str()))
     {
-    return LinearGetSourceFileWithOutput(cname);
+    return LinearGetSourceFileWithOutput(name.c_str());
     }
   // Otherwise we use an efficient lookup map.
   OutputToSourceMap::const_iterator o = this->OutputToSource.find(name);
@@ -2148,15 +2139,12 @@ cmMakefile::GetSourceGroup(const std::vector<std::string>&name) const
   return sg;
 }
 
- void cmMakefile::AddSourceGroup(const char* name,
+void cmMakefile::AddSourceGroup(const std::string& name,
                                  const char* regex)
 {
-  if (name)
-    {
-    std::vector<std::string> nameVector;
-    nameVector.push_back(name);
-    AddSourceGroup(nameVector, regex);
-    }
+  std::vector<std::string> nameVector;
+  nameVector.push_back(name);
+  AddSourceGroup(nameVector, regex);
 }
 
 void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
@@ -2329,13 +2317,13 @@ void cmMakefile::ExpandVariablesCMP0019()
     }
 }
 
-bool cmMakefile::IsOn(const char* name) const
+bool cmMakefile::IsOn(const std::string& name) const
 {
   const char* value = this->GetDefinition(name);
   return cmSystemTools::IsOn(value);
 }
 
-bool cmMakefile::IsSet(const char* name) const
+bool cmMakefile::IsSet(const std::string& name) const
 {
   const char* value = this->GetDefinition(name);
   if ( !value )
@@ -2406,7 +2394,7 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName) const
   return true;
 }
 
-const char* cmMakefile::GetRequiredDefinition(const char* name) const
+const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
 {
   const char* ret = this->GetDefinition(name);
   if(!ret)
@@ -2414,13 +2402,13 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may be not be built correctly.\n",
                          "Missing variable is:\n",
-                         name);
+                         name.c_str());
     return "";
     }
   return ret;
 }
 
-bool cmMakefile::IsDefinitionSet(const char* name) const
+bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
   const char* def = this->Internal->VarStack.top().Get(name);
   this->Internal->VarUsageStack.top().insert(name);
@@ -2442,7 +2430,7 @@ bool cmMakefile::IsDefinitionSet(const char* name) const
   return def?true:false;
 }
 
-const char* cmMakefile::GetDefinition(const char* name) const
+const char* cmMakefile::GetDefinition(const std::string& name) const
 {
   if (this->WarnUnused)
     {
@@ -2483,7 +2471,7 @@ const char* cmMakefile::GetDefinition(const char* name) const
   return def;
 }
 
-const char* cmMakefile::GetSafeDefinition(const char* def) const
+const char* cmMakefile::GetSafeDefinition(const std::string& def) const
 {
   const char* ret = this->GetDefinition(def);
   if(!ret)
@@ -2496,7 +2484,7 @@ const char* cmMakefile::GetSafeDefinition(const char* def) const
 std::vector<std::string> cmMakefile
 ::GetDefinitions(int cacheonly /* = 0 */) const
 {
-  std::set<cmStdString> definitions;
+  std::set<std::string> definitions;
   if ( !cacheonly )
     {
     definitions = this->Internal->VarStack.top().ClosureKeys();
@@ -2510,7 +2498,7 @@ std::vector<std::string> cmMakefile
 
   std::vector<std::string> res;
 
-  std::set<cmStdString>::iterator fit;
+  std::set<std::string>::iterator fit;
   for ( fit = definitions.begin(); fit != definitions.end(); fit ++ )
     {
     res.push_back(*fit);
@@ -2965,7 +2953,7 @@ cmMakefile::LexicalPushPop::~LexicalPushPop()
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
-void cmMakefile::SetHomeDirectory(const char* dir)
+void cmMakefile::SetHomeDirectory(const std::string& dir)
 {
   this->cmHomeDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
@@ -2976,7 +2964,7 @@ void cmMakefile::SetHomeDirectory(const char* dir)
     }
 }
 
-void cmMakefile::SetHomeOutputDirectory(const char* lib)
+void cmMakefile::SetHomeOutputDirectory(const std::string& lib)
 {
   this->HomeOutputDirectory = lib;
   cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
@@ -3010,9 +2998,9 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
+cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
-  cmSourceFileLocation sfl(this, sourceName);
+  cmSourceFileLocation sfl(this, sourceName.c_str());
   for(std::vector<cmSourceFile*>::const_iterator
         sfi = this->SourceFiles.begin();
       sfi != this->SourceFiles.end(); ++sfi)
@@ -3027,7 +3015,7 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
+cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
                                             bool generated)
 {
   if(cmSourceFile* esf = this->GetSource(sourceName))
@@ -3036,7 +3024,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     }
   else
     {
-    cmSourceFile* sf = new cmSourceFile(this, sourceName);
+    cmSourceFile* sf = new cmSourceFile(this, sourceName.c_str());
     if(generated)
       {
       sf->SetProperty("GENERATED", "1");
@@ -3547,17 +3535,9 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
   return res;
 }
 
-void cmMakefile::SetProperty(const char* prop, const char* value)
+void cmMakefile::SetProperty(const std::string& prop, const char* value)
 {
-  if (!prop)
-    {
-    return;
-    }
-
-  // handle special props
-  std::string propname = prop;
-
-  if ( propname == "LINK_DIRECTORIES" )
+  if ( prop == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
     if(value)
@@ -3567,7 +3547,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->SetLinkDirectories(varArgsExpanded);
     return;
     }
-  if (propname == "INCLUDE_DIRECTORIES")
+  if (prop == "INCLUDE_DIRECTORIES")
     {
     this->IncludeDirectoriesEntries.clear();
       if (!value)
@@ -3580,7 +3560,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_OPTIONS")
+  if (prop == "COMPILE_OPTIONS")
     {
     this->CompileOptionsEntries.clear();
       if (!value)
@@ -3592,7 +3572,7 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_DEFINITIONS")
+  if (prop == "COMPILE_DEFINITIONS")
     {
     this->CompileDefinitionsEntries.clear();
     if (!value)
@@ -3606,13 +3586,13 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
     return;
     }
 
-  if ( propname == "INCLUDE_REGULAR_EXPRESSION" )
+  if ( prop == "INCLUDE_REGULAR_EXPRESSION" )
     {
     this->SetIncludeRegularExpression(value);
     return;
     }
 
-  if ( propname == "ADDITIONAL_MAKE_CLEAN_FILES" )
+  if ( prop == "ADDITIONAL_MAKE_CLEAN_FILES" )
     {
     // This property is not inherrited
     if ( strcmp(this->GetCurrentDirectory(),
@@ -3625,18 +3605,11 @@ void cmMakefile::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
 }
 
-void cmMakefile::AppendProperty(const char* prop, const char* value,
+void cmMakefile::AppendProperty(const std::string& prop,
+                                const char* value,
                                 bool asString)
 {
-  if (!prop)
-    {
-    return;
-    }
-
-  // handle special props
-  std::string propname = prop;
-
-  if (propname == "INCLUDE_DIRECTORIES")
+  if (prop == "INCLUDE_DIRECTORIES")
     {
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
@@ -3644,7 +3617,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_OPTIONS")
+  if (prop == "COMPILE_OPTIONS")
     {
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
@@ -3652,7 +3625,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if (propname == "COMPILE_DEFINITIONS")
+  if (prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt;
     this->GetBacktrace(lfbt);
@@ -3660,7 +3633,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
-  if ( propname == "LINK_DIRECTORIES" )
+  if ( prop == "LINK_DIRECTORIES" )
     {
     std::vector<std::string> varArgsExpanded;
     cmSystemTools::ExpandListArgument(value, varArgsExpanded);
@@ -3675,32 +3648,18 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
   this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
 }
 
-const char *cmMakefile::GetPropertyOrDefinition(const char* prop) const
-{
-  const char *ret = this->GetProperty(prop, cmProperty::DIRECTORY);
-  if (!ret)
-    {
-    ret = this->GetDefinition(prop);
-    }
-  return ret;
-}
-
-const char *cmMakefile::GetProperty(const char* prop) const
+const char *cmMakefile::GetProperty(const std::string& prop) const
 {
   return this->GetProperty(prop, cmProperty::DIRECTORY);
 }
 
-const char *cmMakefile::GetProperty(const char* prop,
+const char *cmMakefile::GetProperty(const std::string& prop,
                                     cmProperty::ScopeType scope) const
 {
-  if(!prop)
-    {
-    return 0;
-    }
   // watch for specific properties
   static std::string output;
   output = "";
-  if (!strcmp("PARENT_DIRECTORY",prop))
+  if (prop == "PARENT_DIRECTORY")
     {
     if(cmLocalGenerator* plg = this->LocalGenerator->GetParent())
       {
@@ -3708,14 +3667,14 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("INCLUDE_REGULAR_EXPRESSION",prop) )
+  else if (prop == "INCLUDE_REGULAR_EXPRESSION" )
     {
     output = this->GetIncludeRegularExpression();
     return output.c_str();
     }
-  else if (!strcmp("LISTFILE_STACK",prop))
+  else if (prop == "LISTFILE_STACK")
     {
-    for (std::deque<cmStdString>::const_iterator
+    for (std::deque<std::string>::const_iterator
         i = this->ListFileStack.begin();
         i != this->ListFileStack.end(); ++i)
       {
@@ -3727,10 +3686,10 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("VARIABLES",prop) || !strcmp("CACHE_VARIABLES",prop))
+  else if (prop == "VARIABLES" || prop == "CACHE_VARIABLES")
     {
     int cacheonly = 0;
-    if ( !strcmp("CACHE_VARIABLES",prop) )
+    if ( prop == "CACHE_VARIABLES" )
       {
       cacheonly = 1;
       }
@@ -3745,17 +3704,17 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("MACROS",prop))
+  else if (prop == "MACROS")
     {
     this->GetListOfMacros(output);
     return output.c_str();
     }
-  else if (!strcmp("DEFINITIONS",prop))
+  else if (prop == "DEFINITIONS")
     {
     output += this->DefineFlagsOrig;
     return output.c_str();
     }
-  else if (!strcmp("LINK_DIRECTORIES",prop))
+  else if (prop == "LINK_DIRECTORIES")
     {
     cmOStringStream str;
     for (std::vector<std::string>::const_iterator
@@ -3772,7 +3731,7 @@ const char *cmMakefile::GetProperty(const char* prop,
     output = str.str();
     return output.c_str();
     }
-  else if (!strcmp("INCLUDE_DIRECTORIES",prop))
+  else if (prop == "INCLUDE_DIRECTORIES")
     {
     std::string sep;
     for (std::vector<cmValueWithOrigin>::const_iterator
@@ -3786,7 +3745,7 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("COMPILE_OPTIONS",prop))
+  else if (prop == "COMPILE_OPTIONS")
     {
     std::string sep;
     for (std::vector<cmValueWithOrigin>::const_iterator
@@ -3800,7 +3759,7 @@ const char *cmMakefile::GetProperty(const char* prop,
       }
     return output.c_str();
     }
-  else if (!strcmp("COMPILE_DEFINITIONS",prop))
+  else if (prop == "COMPILE_DEFINITIONS")
     {
     std::string sep;
     for (std::vector<cmValueWithOrigin>::const_iterator
@@ -3831,17 +3790,18 @@ const char *cmMakefile::GetProperty(const char* prop,
   return retVal;
 }
 
-bool cmMakefile::GetPropertyAsBool(const char* prop) const
+bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
 //----------------------------------------------------------------------------
-const char* cmMakefile::GetFeature(const char* feature, const char* config)
+const char* cmMakefile::GetFeature(const std::string& feature,
+                                   const std::string& config)
 {
   // TODO: Define accumulation policy for features (prepend, append, replace).
   // Currently we always replace.
-  if(config && *config)
+  if(!config.empty())
     {
     std::string featureConfig = feature;
     featureConfig += "_";
@@ -3884,34 +3844,27 @@ cmTarget* cmMakefile::FindTarget(const std::string& name,
 }
 
 //----------------------------------------------------------------------------
-cmTest* cmMakefile::CreateTest(const char* testName)
+cmTest* cmMakefile::CreateTest(const std::string& testName)
 {
-  if ( !testName )
-    {
-    return 0;
-    }
   cmTest* test = this->GetTest(testName);
   if ( test )
     {
     return test;
     }
   test = new cmTest(this);
-  test->SetName(testName);
+  test->SetName(testName.c_str());
   this->Tests[testName] = test;
   return test;
 }
 
 //----------------------------------------------------------------------------
-cmTest* cmMakefile::GetTest(const char* testName) const
+cmTest* cmMakefile::GetTest(const std::string& testName) const
 {
-  if(testName)
+  std::map<std::string, cmTest*>::const_iterator
+    mi = this->Tests.find(testName);
+  if(mi != this->Tests.end())
     {
-    std::map<cmStdString, cmTest*>::const_iterator
-      mi = this->Tests.find(testName);
-    if(mi != this->Tests.end())
-      {
-      return mi->second;
-      }
+    return mi->second;
     }
   return 0;
 }
@@ -3946,7 +3899,7 @@ std::string cmMakefile::GetListFileStack() const
   size_t depth = this->ListFileStack.size();
   if (depth > 0)
     {
-    std::deque<cmStdString>::const_iterator it = this->ListFileStack.end();
+    std::deque<std::string>::const_iterator it = this->ListFileStack.end();
     do
       {
       if (depth != this->ListFileStack.size())
@@ -3969,8 +3922,8 @@ std::string cmMakefile::GetListFileStack() const
 void cmMakefile::PushScope()
 {
   cmDefinitions* parent = &this->Internal->VarStack.top();
-  const std::set<cmStdString>& init = this->Internal->VarInitStack.top();
-  const std::set<cmStdString>& usage = this->Internal->VarUsageStack.top();
+  const std::set<std::string>& init = this->Internal->VarInitStack.top();
+  const std::set<std::string>& usage = this->Internal->VarUsageStack.top();
   this->Internal->VarStack.push(cmDefinitions(parent));
   this->Internal->VarInitStack.push(init);
   this->Internal->VarUsageStack.push(usage);
@@ -3979,12 +3932,12 @@ void cmMakefile::PushScope()
 void cmMakefile::PopScope()
 {
   cmDefinitions* current = &this->Internal->VarStack.top();
-  std::set<cmStdString> init = this->Internal->VarInitStack.top();
-  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
-  const std::set<cmStdString>& locals = current->LocalKeys();
+  std::set<std::string> init = this->Internal->VarInitStack.top();
+  std::set<std::string> usage = this->Internal->VarUsageStack.top();
+  const std::set<std::string>& locals = current->LocalKeys();
   // Remove initialization and usage information for variables in the local
   // scope.
-  std::set<cmStdString>::const_iterator it = locals.begin();
+  std::set<std::string>::const_iterator it = locals.begin();
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);
@@ -4013,9 +3966,9 @@ void cmMakefile::PopScope()
     }
 }
 
-void cmMakefile::RaiseScope(const char *var, const char *varDef)
+void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
 {
-  if (!var || !strlen(var))
+  if (var.empty())
     {
     return;
     }
@@ -4024,10 +3977,10 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
   if(cmDefinitions* up = cur.GetParent())
     {
     // First localize the definition in the current scope.
-    cur.Get(var);
+    cur.Get(var.c_str());
 
     // Now update the definition in the parent scope.
-    up->Set(var, varDef);
+    up->Set(var.c_str(), varDef);
     }
   else if(cmLocalGenerator* plg = this->LocalGenerator->GetParent())
     {
@@ -4037,11 +3990,11 @@ void cmMakefile::RaiseScope(const char *var, const char *varDef)
     cmMakefile* parent = plg->GetMakefile();
     if (varDef)
       {
-      parent->AddDefinition(var, varDef);
+      parent->AddDefinition(var.c_str(), varDef);
       }
     else
       {
-      parent->RemoveDefinition(var);
+      parent->RemoveDefinition(var.c_str());
       }
     }
   else
@@ -4069,7 +4022,8 @@ void cmMakefile::DefineProperties(cmake *cm)
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
+cmMakefile::AddImportedTarget(const std::string& name,
+                              cmTarget::TargetType type,
                               bool global)
 {
   // Create the target.
@@ -4096,7 +4050,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
-  std::map<cmStdString, cmTarget*>::const_iterator
+  std::map<std::string, cmTarget*>::const_iterator
     imported = this->ImportedTargets.find(name);
   if(imported != this->ImportedTargets.end())
     {
@@ -4110,8 +4064,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
     }
 
   // Look for a target built in this project.
-  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0,
-                                                              name.c_str(),
+  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(name.c_str(),
                                                               excludeAliases);
 }
 
@@ -4126,7 +4079,7 @@ bool cmMakefile::IsAlias(const std::string& name) const
 
 //----------------------------------------------------------------------------
 cmGeneratorTarget*
-cmMakefile::FindGeneratorTargetToUse(const char* name) const
+cmMakefile::FindGeneratorTargetToUse(const std::string& name) const
 {
   if (cmTarget *t = this->FindTargetToUse(name))
     {
@@ -4228,8 +4181,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::EnforceUniqueDir(const char* srcPath,
-                                  const char* binPath) const
+bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
+                                  const std::string& binPath) const
 {
   // Make sure the binary directory is unique.
   cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();

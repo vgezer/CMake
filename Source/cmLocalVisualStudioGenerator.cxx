@@ -80,7 +80,7 @@ const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(cmCustomCommand const& cc,
-                  const char* configName,
+                  const std::string& configName,
                   const char* newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();

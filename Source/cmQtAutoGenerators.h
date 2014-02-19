@@ -51,15 +51,15 @@ private:
   bool GenerateUi(const std::string& path, const std::string& uiFileName);
   bool GenerateQrc();
   void ParseCppFile(const std::string& absFilename,
-                    const std::vector<std::string>& headerExtensions,
+                    const std::set<std::string>& headerExtensions,
                     std::map<std::string, std::string>& includedMocs,
                           std::map<std::string, std::string>& includedUis);
   void StrictParseCppFile(const std::string& absFilename,
-                          const std::vector<std::string>& headerExtensions,
+                          const std::set<std::string>& headerExtensions,
                           std::map<std::string, std::string>& includedMocs,
                           std::map<std::string, std::string>& includedUis);
   void SearchHeadersForCppFile(const std::string& absFilename,
-                              const std::vector<std::string>& headerExtensions,
+                              const std::set<std::string>& headerExtensions,
                               std::set<std::string>& absHeaders);
 
   void ParseHeaders(const std::set<std::string>& absHeaders,
@@ -76,7 +76,7 @@ private:
 
   void Init();
 
-  std::string Join(const std::vector<std::string>& lst, char separator);
+  std::string Join(const std::set<std::string>& lst, char separator);
   bool EndsWith(const std::string& str, const std::string& with);
   bool StartsWith(const std::string& str, const std::string& with);
 

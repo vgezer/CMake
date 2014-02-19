@@ -106,11 +106,12 @@ public:
    */
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
   enum OutputFormat { UNCHANGED, MAKEFILE, SHELL, RESPONSE };
-  std::string ConvertToOutputFormat(const char* source, OutputFormat output);
-  std::string Convert(const char* remote, RelativeRoot local,
+  std::string ConvertToOutputFormat(const std::string& source,
+                                    OutputFormat output);
+  std::string Convert(const std::string& remote, RelativeRoot local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
-  std::string Convert(RelativeRoot remote, const char* local,
+  std::string Convert(RelativeRoot remote, const std::string& local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
 
@@ -125,7 +126,7 @@ public:
    * remote path must use forward slashes and not already be escaped
    * or quoted.
    */
-  std::string ConvertToOptionallyRelativeOutputPath(const char* remote);
+  std::string ConvertToOptionallyRelativeOutputPath(const std::string& remote);
 
   ///! set/get the parent generator
   cmLocalGenerator* GetParent(){return this->Parent;}
@@ -137,24 +138,25 @@ public:
 
 
   void AddArchitectureFlags(std::string& flags, cmGeneratorTarget* target,
-                            const char *lang, const char* config);
+                            const char *lang, const std::string& config);
 
   void AddLanguageFlags(std::string& flags, const char* lang,
-                        const char* config);
+                        const std::string& config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
-                       std::string const& lang, const char *config);
+                       std::string const& lang, const std::string& config);
   void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
                                 const char *lang);
-  void AddConfigVariableFlags(std::string& flags, const char* var,
-                              const char* config);
+  void AddConfigVariableFlags(std::string& flags, const std::string& var,
+                              const std::string& config);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
-  virtual void AppendFlagEscape(std::string& flags, const char* rawFlag);
+  virtual void AppendFlagEscape(std::string& flags,
+                                const std::string& rawFlag);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               cmGeneratorTarget* target,
                               const char* lang, bool forResponseFile = false,
-                              const char *config = 0);
+                              const std::string& config = "");
 
   /**
    * Encode a list of preprocessor definitions for the compiler
@@ -193,17 +195,17 @@ public:
    *   the source directory of this generator.  This should only be
    *   used for dependencies of custom commands.
    */
-  bool GetRealDependency(const char* name, const char* config,
+  bool GetRealDependency(const std::string& name, const std::string& config,
                          std::string& dep);
 
   ///! for existing files convert to output path and short path if spaces
-  std::string ConvertToOutputForExisting(const char* remote,
+  std::string ConvertToOutputForExisting(const std::string& remote,
                                          RelativeRoot local = START_OUTPUT);
 
   /** For existing path identified by RelativeRoot convert to output
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
-                                         const char* local = 0);
+                                         const std::string& local = "");
 
   virtual std::string ConvertToIncludeReference(std::string const& path);
 
@@ -220,13 +222,14 @@ public:
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
                              cmGeneratorTarget* target,
-                             const char* lang = "C", const char *config = 0,
+                             const char* lang = "C",
+                             const std::string& config = "",
                              bool stripImplicitInclDirs = true);
   void AddCompileOptions(std::string& flags, cmTarget* target,
-                         const char* lang, const char* config);
+                         const char* lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmTarget const* target,
-                             const char* config);
+                             const std::string& config);
 
   /** Compute the language used to compile the given source file.  */
   const char* GetSourceFileLanguage(const cmSourceFile& source);
@@ -278,14 +281,14 @@ public:
       system to replace make variable references.  Optionally adjust
       escapes for the special case of passing to the native echo
       command.  */
-  std::string EscapeForShell(const char* str, bool makeVars = false,
+  std::string EscapeForShell(const std::string& str, bool makeVars = false,
                              bool forEcho = false);
 
   /** Backwards-compatibility version of EscapeForShell.  */
-  std::string EscapeForShellOldStyle(const char* str);
+  std::string EscapeForShellOldStyle(const std::string& str);
 
   /** Escape the given string as an argument in a CMake script.  */
-  static std::string EscapeForCMake(const char* str);
+  static std::string EscapeForCMake(const std::string& str);
 
   enum FortranFormat
     {
@@ -303,7 +306,8 @@ public:
    * or quoted.
    */
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const char* remote, bool force=false);
+                                    const std::string& remote,
+                                    bool force=false);
 
   /**
    * Get the relative path from the generator output directory to a
@@ -377,9 +381,9 @@ protected:
   std::string ExpandRuleVariable(std::string const& variable,
                                  const RuleVariables& replaceValues);
 
-  const char* GetRuleLauncher(cmTarget* target, const char* prop);
+  const char* GetRuleLauncher(cmTarget* target, const std::string& prop);
   void InsertRuleLauncher(std::string& s, cmTarget* target,
-                          const char* prop);
+                          const std::string& prop);
 
 
   /** Convert a target to a utility target for unsupported
@@ -395,14 +399,14 @@ protected:
   // generator directly.  Any targets containing files that are not
   // of the types listed will be compiled as custom commands and added
   // to a custom target.
-  void CreateCustomTargetsAndCommands(std::set<cmStdString> const&);
+  void CreateCustomTargetsAndCommands(std::set<std::string> const&);
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(
     std::ostream& os, const char* config,
     std::vector<std::string> const& configurationTypes);
 
-  std::string& CreateSafeUniqueObjectFileName(const char* sin,
+  std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
   void ComputeObjectMaxPath();
 
@@ -431,9 +435,9 @@ protected:
   std::vector<std::string> StartOutputDirectoryComponents;
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
-  std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
+  std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
-  std::set<cmStdString> ObjectMaxPathViolations;
+  std::set<std::string> ObjectMaxPathViolations;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;
@@ -463,7 +467,7 @@ protected:
   cmIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;
 private:
-  std::string ConvertToOutputForExistingCommon(const char* remote,
+  std::string ConvertToOutputForExistingCommon(const std::string& remote,
                                                std::string const& result);
 
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);

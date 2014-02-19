@@ -18,9 +18,10 @@
 
 //----------------------------------------------------------------------------
 cmSourceFileLocation
-::cmSourceFileLocation(cmMakefile const* mf, const char* name): Makefile(mf)
+::cmSourceFileLocation(cmMakefile const* mf, const std::string& name)
+  : Makefile(mf)
 {
-  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name);
+  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name.c_str());
   this->AmbiguousExtension = true;
   this->Directory = cmSystemTools::GetFilenamePath(name);
   this->Name = cmSystemTools::GetFilenameName(name);
@@ -28,7 +29,7 @@ cmSourceFileLocation
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::Update(const char* name)
+void cmSourceFileLocation::Update(const std::string& name)
 {
   if(this->AmbiguousDirectory)
     {
@@ -80,7 +81,7 @@ void cmSourceFileLocation::DirectoryUseBinary()
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::UpdateExtension(const char* name)
+void cmSourceFileLocation::UpdateExtension(const std::string& name)
 {
   // Check the extension.
   std::string ext = cmSystemTools::GetFilenameLastExtension(name);
@@ -90,11 +91,11 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
   cmGlobalGenerator* gg =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
   cmMakefile const* mf = this->Makefile;
-  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
-  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
+  const std::set<std::string>& srcExts = mf->GetSourceExtensions();
+  const std::set<std::string>& hdrExts = mf->GetHeaderExtensions();
   if(gg->GetLanguageFromExtension(ext.c_str()) ||
-     std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end() ||
-     std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
+     (srcExts.count(ext) > 0) ||
+     (hdrExts.count(ext) > 0))
     {
     // This is a known extension.  Use the given filename with extension.
     this->Name = cmSystemTools::GetFilenameName(name);
@@ -136,10 +137,10 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::UpdateDirectory(const char* name)
+void cmSourceFileLocation::UpdateDirectory(const std::string& name)
 {
   // If a full path was given we know the directory.
-  if(cmSystemTools::FileIsFullPath(name))
+  if(cmSystemTools::FileIsFullPath(name.c_str()))
     {
     this->Directory = cmSystemTools::GetFilenamePath(name);
     this->AmbiguousDirectory = false;
@@ -171,13 +172,13 @@ cmSourceFileLocation
   // disk.  One of these must match if loc refers to this source file.
   std::string ext = this->Name.substr(loc.Name.size()+1);
   cmMakefile const* mf = this->Makefile;
-  const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
-  if(std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end())
+  const std::set<std::string>& srcExts = mf->GetSourceExtensions();
+  if(srcExts.count(ext) > 0)
     {
     return true;
     }
-  const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
-  if(std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
+  const std::set<std::string>& hdrExts = mf->GetHeaderExtensions();
+  if(hdrExts.count(ext) > 0)
     {
     return true;
     }

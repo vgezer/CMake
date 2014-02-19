@@ -82,7 +82,7 @@ public:
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
+                                        const std::string& config,
                                         const char* suffix,
                                         std::string& dir);
 
@@ -102,7 +102,7 @@ private:
                     const char* name, const char* path, cmTarget const& t);
   void WriteExternalProject(std::ostream& fout,
                             const char* name, const char* path,
-                            const std::set<cmStdString>& dependencies);
+                            const std::set<std::string>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget const* target);
   std::string MSDevCommand;

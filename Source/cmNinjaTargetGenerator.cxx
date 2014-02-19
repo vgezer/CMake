@@ -91,19 +91,19 @@ cmGlobalNinjaGenerator* cmNinjaTargetGenerator::GetGlobalGenerator() const
   return this->LocalGenerator->GetGlobalNinjaGenerator();
 }
 
-const char* cmNinjaTargetGenerator::GetConfigName() const
+std::string const& cmNinjaTargetGenerator::GetConfigName() const
 {
   return this->LocalGenerator->GetConfigName();
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-const char* cmNinjaTargetGenerator::GetFeature(const char* feature)
+const char* cmNinjaTargetGenerator::GetFeature(const std::string& feature)
 {
   return this->Target->GetFeature(feature, this->GetConfigName());
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-bool cmNinjaTargetGenerator::GetFeatureAsBool(const char* feature)
+bool cmNinjaTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
   return cmSystemTools::IsOn(this->GetFeature(feature));
 }
@@ -498,10 +498,10 @@ cmNinjaTargetGenerator
     {
     this->WriteObjectBuildStatement(*si);
     }
-  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  if(!def.empty())
     {
-    this->ModuleDefinitionFile = this->ConvertToNinjaPath(
-      this->GeneratorTarget->ModuleDefinitionFile.c_str());
+    this->ModuleDefinitionFile = this->ConvertToNinjaPath(def.c_str());
     }
 
   {

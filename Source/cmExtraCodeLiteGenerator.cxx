@@ -60,7 +60,7 @@ void cmExtraCodeLiteGenerator::Generate()
 
   // loop projects and locate the root project.
   // and extract the information for creating the worspace
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it!= this->GlobalGenerator->GetProjectMap().end();
        ++it)
@@ -85,7 +85,7 @@ void cmExtraCodeLiteGenerator::Generate()
     }
 
   // for each sub project in the workspace create a codelite project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it!= this->GlobalGenerator->GetProjectMap().end();
        ++it)
@@ -222,7 +222,7 @@ void cmExtraCodeLiteGenerator
             bool isCFile = false;
             if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
               {
-              for(std::vector<std::string>::const_iterator
+              for(std::set<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
                   ext !=  mf->GetSourceExtensions().end();
                   ++ext)
@@ -268,7 +268,7 @@ void cmExtraCodeLiteGenerator
     headerBasename+=cmSystemTools::GetFilenameWithoutExtension(sit->first);
 
     // check if there's a matching header around
-    for(std::vector<std::string>::const_iterator
+    for(std::set<std::string>::const_iterator
         ext = mf->GetHeaderExtensions().begin();
         ext !=  mf->GetHeaderExtensions().end();
         ++ext)
