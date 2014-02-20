@@ -121,24 +121,7 @@ private:
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
-  mutable std::string ModuleDefinitionFile;
 
-  mutable ResxData Resx;
-
-  mutable bool SourceFileFlagsConstructed;
-  mutable bool ObjectSourcesDone;
-  mutable bool IDLSourcesDone;
-  mutable bool ExtraSourcesDone;
-  mutable bool HeaderSourcesDone;
-  mutable bool CustomCommandsDone;
-  mutable bool ExternalObjectsDone;
-  mutable bool ResxDone;
-  mutable bool ModuleDefinitionFileDone;
-  mutable std::vector<cmSourceFile*> CustomCommands;
-  mutable std::vector<cmSourceFile*> ExtraSources;
-  mutable std::vector<cmSourceFile*> HeaderSources;
-  mutable std::vector<cmSourceFile*> ExternalObjects;
-  mutable std::vector<cmSourceFile*> IDLSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
   mutable std::vector<cmSourceFile*> ObjectSources;
@@ -146,6 +129,7 @@ private:
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   void ConstructSourceFileFlags() const;
+  mutable bool SourceFileFlagsConstructed;
   mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   cmGeneratorTarget(cmGeneratorTarget const&);

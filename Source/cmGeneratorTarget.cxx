@@ -236,15 +236,7 @@ struct TagVisitor
 
 //----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
-  SourceFileFlagsConstructed(false),
-  ObjectSourcesDone(false),
-  IDLSourcesDone(false),
-  ExtraSourcesDone(false),
-  HeaderSourcesDone(false),
-  CustomCommandsDone(false),
-  ExternalObjectsDone(false),
-  ResxDone(false),
-  ModuleDefinitionFileDone(false)
+  SourceFileFlagsConstructed(false)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
@@ -315,11 +307,10 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
 }
 
 #define IMPLEMENT_VISIT_IMPL(DATA, DATATYPE) \
-if (!this->DATA ## Done) \
   { \
   std::vector<cmSourceFile*> sourceFiles; \
   this->Target->GetSourceFiles(sourceFiles); \
-  TagVisitor<DATA ## Tag DATATYPE> visitor(this->Target, this->DATA); \
+  TagVisitor<DATA ## Tag DATATYPE> visitor(this->Target, data); \
   for(std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
       si != sourceFiles.end(); ++si) \
     { \
@@ -329,9 +320,8 @@ if (!this->DATA ## Done) \
       } \
     visitor.Accept(*si); \
     } \
-  this->DATA ## Done = true; \
   } \
-data = this->DATA;
+
 
 #define IMPLEMENT_VISIT(DATA) \
   IMPLEMENT_VISIT_IMPL(DATA, EMPTY) \
@@ -344,6 +334,10 @@ void
 cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &data) const
 {
   IMPLEMENT_VISIT(ObjectSources);
+  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    this->ObjectSources = data;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -408,7 +402,7 @@ cmGeneratorTarget::GetExternalObjects(std::vector<cmSourceFile*>& data) const
 void
 cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs) const
 {
-  ResxData data = this->Resx;
+  ResxData data;
   IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
   srcs = data.ExpectedResxHeaders;
 }
@@ -416,7 +410,7 @@ cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs) const
 //----------------------------------------------------------------------------
 void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
 {
-  ResxData data = this->Resx;
+  ResxData data;
   IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
   srcs = data.ResxSources;
 }
