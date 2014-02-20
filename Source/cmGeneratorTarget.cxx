@@ -24,24 +24,6 @@
 
 #include "assert.h"
 
-
-//----------------------------------------------------------------------------
-bool FindSourceFile(cmSourceFile *sf, cmTarget *tgt)
-{
-  std::string e;
-  if((sf)->GetFullPath(&e).empty())
-    {
-    if(!e.empty())
-      {
-      cmake* cm = tgt->GetMakefile()->GetCMakeInstance();
-      cm->IssueMessage(cmake::FATAL_ERROR, e,
-                       tgt->GetBacktrace());
-      }
-    return false;
-    }
-  return true;
-}
-
 //----------------------------------------------------------------------------
 void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
                      cmTarget *target, cmake *cm)
@@ -314,10 +296,6 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
   for(std::vector<cmSourceFile*>::const_iterator si = sourceFiles.begin(); \
       si != sourceFiles.end(); ++si) \
     { \
-    if (!FindSourceFile(*si, this->Target)) \
-      { \
-      break; \
-      } \
     visitor.Accept(*si); \
     } \
   } \
