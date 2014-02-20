@@ -70,39 +70,12 @@ struct IDLSourcesTag {};
 struct ResxTag {};
 struct ModuleDefinitionFileTag {};
 
-template<typename Tag, typename OtherTag>
-struct IsSameTag
-{
-  enum {
-    Result = false
-  };
-};
-
-template<typename Tag>
-struct IsSameTag<Tag, Tag>
-{
-  enum {
-    Result = true
-  };
-};
-
-template<bool, typename T>
-void doAccept(T&, cmSourceFile*)
-{
-}
-
-template<>
-void doAccept<true,
-              std::vector<cmSourceFile*> >(std::vector<cmSourceFile*>& files,
-                                           cmSourceFile* f)
+void doAccept(std::vector<cmSourceFile*>& files, cmSourceFile* f)
 {
   files.push_back(f);
 }
 
-template<>
-void doAccept<true,
-              cmGeneratorTarget::ResxData>(cmGeneratorTarget::ResxData& data,
-                                            cmSourceFile* f)
+void doAccept(cmGeneratorTarget::ResxData& data, cmSourceFile* f)
 {
   // Build and save the name of the corresponding .h file
   // This relationship will be used later when building the project files.
@@ -115,11 +88,32 @@ void doAccept<true,
   data.ResxSources.push_back(f);
 }
 
-template<>
-void doAccept<true, std::string>(std::string& data, cmSourceFile* f)
+void doAccept(std::string& data, cmSourceFile* f)
 {
   data = f->GetFullPath();
 }
+
+#define ACCEPT_OVERLOAD(DATATYPE, MATCH_TAG) \
+template<typename Data, typename Tag> \
+void acceptProxy(Data&, cmSourceFile*, Tag, MATCH_TAG) \
+{ \
+} \
+ \
+template<> \
+void acceptProxy(DATATYPE& data, cmSourceFile* f, \
+                 MATCH_TAG, MATCH_TAG) \
+{ \
+  doAccept(data, f); \
+}
+
+ACCEPT_OVERLOAD(std::vector<cmSourceFile*>, ObjectSourcesTag)
+ACCEPT_OVERLOAD(std::vector<cmSourceFile*>, CustomCommandsTag)
+ACCEPT_OVERLOAD(std::vector<cmSourceFile*>, ExtraSourcesTag)
+ACCEPT_OVERLOAD(std::vector<cmSourceFile*>, HeaderSourcesTag)
+ACCEPT_OVERLOAD(std::vector<cmSourceFile*>, ExternalObjectsTag)
+ACCEPT_OVERLOAD(std::vector<cmSourceFile*>, IDLSourcesTag)
+ACCEPT_OVERLOAD(cmGeneratorTarget::ResxData, ResxTag)
+ACCEPT_OVERLOAD(std::string, ModuleDefinitionFileTag)
 
 //----------------------------------------------------------------------------
 template<typename Tag, typename DataType = std::vector<cmSourceFile*> >
@@ -150,21 +144,26 @@ struct TagVisitor
   void Accept(cmSourceFile *sf)
   {
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
+    Tag tag;
     if(sf->GetCustomCommand())
       {
-      doAccept<IsSameTag<Tag, CustomCommandsTag>::Result>(this->Data, sf);
+      CustomCommandsTag customCommandsTag;
+      acceptProxy(this->Data, sf, tag, customCommandsTag);
       }
     else if(this->Target->GetType() == cmTarget::UTILITY)
       {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
+      ExtraSourcesTag extraSourcesTag;
+      acceptProxy(this->Data, sf, tag, extraSourcesTag);
       }
     else if(sf->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
-      doAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>(this->Data, sf);
+      HeaderSourcesTag headerSourcesTag;
+      acceptProxy(this->Data, sf, tag, headerSourcesTag);
       }
     else if(sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
-      doAccept<IsSameTag<Tag, ExternalObjectsTag>::Result>(this->Data, sf);
+      ExternalObjectsTag externalObjectsTag;
+      acceptProxy(this->Data, sf, tag, externalObjectsTag);
       if(this->IsObjLib)
         {
         this->BadObjLibFiles.push_back(sf);
@@ -172,12 +171,13 @@ struct TagVisitor
       }
     else if(sf->GetLanguage())
       {
-      doAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>(this->Data, sf);
+      ObjectSourcesTag objectSourcesTag;
+      acceptProxy(this->Data, sf, tag, objectSourcesTag);
       }
     else if(ext == "def")
       {
-      doAccept<IsSameTag<Tag, ModuleDefinitionFileTag>::Result>(this->Data,
-                                                                sf);
+      ModuleDefinitionFileTag moduleDefinitionFileTag;
+      acceptProxy(this->Data, sf, tag, moduleDefinitionFileTag);
       if(this->IsObjLib)
         {
         this->BadObjLibFiles.push_back(sf);
@@ -185,7 +185,8 @@ struct TagVisitor
       }
     else if(ext == "idl")
       {
-      doAccept<IsSameTag<Tag, IDLSourcesTag>::Result>(this->Data, sf);
+      IDLSourcesTag idlSourcesTag;
+      acceptProxy(this->Data, sf, tag, idlSourcesTag);
       if(this->IsObjLib)
         {
         this->BadObjLibFiles.push_back(sf);
@@ -193,19 +194,23 @@ struct TagVisitor
       }
     else if(ext == "resx")
       {
-      doAccept<IsSameTag<Tag, ResxTag>::Result>(this->Data, sf);
+      ResxTag resxTag;
+      acceptProxy(this->Data, sf, tag, resxTag);
       }
     else if(this->Header.find(sf->GetFullPath().c_str()))
       {
-      doAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>(this->Data, sf);
+      HeaderSourcesTag headerSourcesTag;
+      acceptProxy(this->Data, sf, tag, headerSourcesTag);
       }
     else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
       {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
+      ExtraSourcesTag extraSourcesTag;
+      acceptProxy(this->Data, sf, tag, extraSourcesTag);
       }
     else
       {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
+      ExtraSourcesTag extraSourcesTag;
+      acceptProxy(this->Data, sf, tag, extraSourcesTag);
       if(this->IsObjLib && ext != "txt")
         {
         this->BadObjLibFiles.push_back(sf);
