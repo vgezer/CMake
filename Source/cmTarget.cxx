@@ -5200,12 +5200,10 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config,
     cmTargetInternals::LinkInterfaceMapType::value_type entry(key, iface);
     i = this->Internal->LinkInterfaceMap.insert(entry).first;
     }
-  else if(!i->second.Complete)
+  else if(!i->second.Complete && i->second.Exists)
     {
-      this->Internal->ComputeLinkInterface(this, config,
-                                           i->second,
-                                              head,
-                                              i->second.ExplicitLibraries);
+    this->Internal->ComputeLinkInterface(this, config, i->second, head,
+                                         i->second.ExplicitLibraries);
     }
 
   return i->second.Exists ? &i->second : 0;
