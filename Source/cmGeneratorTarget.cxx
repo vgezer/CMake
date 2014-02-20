@@ -70,7 +70,7 @@ struct IDLSourcesTag {};
 struct ResxTag {};
 struct ModuleDefinitionFileTag {};
 
-template<typename, typename>
+template<typename Tag, typename OtherTag>
 struct IsSameTag
 {
   enum {
