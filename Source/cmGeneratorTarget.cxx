@@ -70,6 +70,7 @@ struct IDLSourcesTag {};
 struct ResxTag {};
 struct ModuleDefinitionFileTag {};
 
+#if !defined(_MSC_VER) || _MSC_VER >= 1310
 template<typename Tag, typename OtherTag>
 struct IsSameTag
 {
@@ -85,6 +86,25 @@ struct IsSameTag<Tag, Tag>
     Result = true
   };
 };
+#else
+struct IsSameTagBase
+{
+  typedef char (&no_type)[1];
+  typedef char (&yes_type)[2];
+  template<typename T> struct Check;
+  template<typename T> static yes_type check(Check<T>*, Check<T>*);
+  static no_type check(...);
+};
+template<typename Tag1, typename Tag2>
+struct IsSameTag: public IsSameTagBase
+{
+  enum {
+    Result = (sizeof(check(static_cast< Check<Tag1>* >(0),
+                           static_cast< Check<Tag2>* >(0))) ==
+              sizeof(yes_type))
+  };
+};
+#endif
 
 template<bool, typename T>
 void doAccept(T&, cmSourceFile*)
@@ -314,8 +334,9 @@ if (!this->DATA ## Done) \
 data = this->DATA;
 
 #define IMPLEMENT_VISIT(DATA) \
-  IMPLEMENT_VISIT_IMPL(DATA, ) \
+  IMPLEMENT_VISIT_IMPL(DATA, EMPTY) \
 
+#define EMPTY
 #define COMMA ,
 
 //----------------------------------------------------------------------------
