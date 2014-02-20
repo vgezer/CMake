@@ -5244,9 +5244,9 @@ cmTarget::GetLinkInterfaceLibraries(const char* config,
     // Compute the link interface for this configuration.
     cmTargetInternals::OptionalLinkInterface iface;
     iface.ExplicitLibraries = this->ComputeLinkInterfaceLibraries(config,
-                                                                  iface,
-                                                                  head,
-                                                                  iface.Exists);
+                                                                iface,
+                                                                head,
+                                                                iface.Exists);
 
     // Store the information for this configuration.
     cmTargetInternals::LinkInterfaceMapType::value_type entry(key, iface);
@@ -5273,7 +5273,8 @@ void processILibs(const char* config,
                           tgt->GetLinkInterfaceLibraries(config, headTarget);
       if (iface)
         {
-        for(std::vector<std::string>::const_iterator it = iface->Libraries.begin();
+        for(std::vector<std::string>::const_iterator
+            it = iface->Libraries.begin();
             it != iface->Libraries.end(); ++it)
           {
           processILibs(config, headTarget, *it, tgts, emitted);
@@ -5305,8 +5306,8 @@ void cmTarget::GetTransitivePropertyTargets(const char* config,
                                       cmTarget const* headTarget,
                                       std::vector<cmTarget*> &tgts) const
 {
-  cmTarget::LinkInterface const* iface = this->GetLinkInterfaceLibraries(config,
-                                                                headTarget);
+  cmTarget::LinkInterface const* iface
+                        = this->GetLinkInterfaceLibraries(config, headTarget);
   if (!iface)
     {
     return;
@@ -5352,7 +5353,8 @@ void cmTarget::GetTransitivePropertyTargets(const char* config,
   for(std::vector<std::string>::const_iterator it = libs.begin();
       it != libs.end(); ++it)
     {
-    if (cmTarget* tgt = headTarget->GetMakefile()->FindTargetToUse(it->c_str()))
+    if (cmTarget* tgt = headTarget->GetMakefile()
+                                  ->FindTargetToUse(it->c_str()))
       {
       tgts.push_back(tgt);
       }
@@ -5595,8 +5597,8 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
         || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
     {
     // The link implementation is the default link interface.
-    cmTarget::LinkImplementation const* impl = thisTarget->GetLinkImplementation(config,
-                                                              headTarget);
+    cmTarget::LinkImplementation const*
+                impl = thisTarget->GetLinkImplementation(config, headTarget);
     iface.ImplementationIsInterface = true;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     if(thisTarget->LinkLanguagePropagatesToDependents())
