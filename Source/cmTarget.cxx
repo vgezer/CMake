@@ -544,7 +544,7 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
         {
         cmake* cm = this->Makefile->GetCMakeInstance();
         cm->IssueMessage(cmake::FATAL_ERROR, e,
-                          this->GetBacktrace());
+                         this->GetBacktrace());
         }
       return;
       }
