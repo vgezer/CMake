@@ -60,7 +60,6 @@ private:
 
 private:
   cmGeneratorTarget* GT;
-  cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   const char* ConfigName;
