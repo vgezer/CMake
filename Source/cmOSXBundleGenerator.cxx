@@ -21,7 +21,6 @@ cmOSXBundleGenerator::
 cmOSXBundleGenerator(cmGeneratorTarget* target,
                      const char* configName)
  : GT(target)
- , Target(target->Target)
  , Makefile(target->Target->GetMakefile())
  , LocalGenerator(Makefile->GetLocalGenerator())
  , ConfigName(configName)
