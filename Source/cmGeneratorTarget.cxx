@@ -88,40 +88,36 @@ struct IsSameTag: public IsSameTagBase
 };
 #endif
 
-template<bool, typename T>
-void doAccept(T&, cmSourceFile*)
+template<bool>
+struct DoAccept
 {
-}
+  template <typename T> static void Do(T&, cmSourceFile*) {}
+};
 
 template<>
-void doAccept<true,
-              std::vector<cmSourceFile*> >(std::vector<cmSourceFile*>& files,
-                                           cmSourceFile* f)
+struct DoAccept<true>
 {
-  files.push_back(f);
-}
-
-template<>
-void doAccept<true,
-              cmGeneratorTarget::ResxData>(cmGeneratorTarget::ResxData& data,
-                                            cmSourceFile* f)
-{
-  // Build and save the name of the corresponding .h file
-  // This relationship will be used later when building the project files.
-  // Both names would have been auto generated from Visual Studio
-  // where the user supplied the file name and Visual Studio
-  // appended the suffix.
-  std::string resx = f->GetFullPath();
-  std::string hFileName = resx.substr(0, resx.find_last_of(".")) + ".h";
-  data.ExpectedResxHeaders.insert(hFileName);
-  data.ResxSources.push_back(f);
-}
-
-template<>
-void doAccept<true, std::string>(std::string& data, cmSourceFile* f)
-{
-  data = f->GetFullPath();
-}
+  static void Do(std::vector<cmSourceFile*>& files, cmSourceFile* f)
+    {
+    files.push_back(f);
+    }
+  static void Do(cmGeneratorTarget::ResxData& data, cmSourceFile* f)
+    {
+    // Build and save the name of the corresponding .h file
+    // This relationship will be used later when building the project files.
+    // Both names would have been auto generated from Visual Studio
+    // where the user supplied the file name and Visual Studio
+    // appended the suffix.
+    std::string resx = f->GetFullPath();
+    std::string hFileName = resx.substr(0, resx.find_last_of(".")) + ".h";
+    data.ExpectedResxHeaders.insert(hFileName);
+    data.ResxSources.push_back(f);
+    }
+  static void Do(std::string& data, cmSourceFile* f)
+    {
+    data = f->GetFullPath();
+    }
+};
 
 //----------------------------------------------------------------------------
 template<typename Tag, typename DataType = std::vector<cmSourceFile*> >
@@ -154,19 +150,19 @@ struct TagVisitor
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
     if(sf->GetCustomCommand())
       {
-      doAccept<IsSameTag<Tag, CustomCommandsTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, CustomCommandsTag>::Result>::Do(this->Data, sf);
       }
     else if(this->Target->GetType() == cmTarget::UTILITY)
       {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
       }
     else if(sf->GetPropertyAsBool("HEADER_FILE_ONLY"))
       {
-      doAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>::Do(this->Data, sf);
       }
     else if(sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
-      doAccept<IsSameTag<Tag, ExternalObjectsTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, ExternalObjectsTag>::Result>::Do(this->Data, sf);
       if(this->IsObjLib)
         {
         this->BadObjLibFiles.push_back(sf);
@@ -174,12 +170,12 @@ struct TagVisitor
       }
     else if(sf->GetLanguage())
       {
-      doAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>::Do(this->Data, sf);
       }
     else if(ext == "def")
       {
-      doAccept<IsSameTag<Tag, ModuleDefinitionFileTag>::Result>(this->Data,
-                                                                sf);
+      DoAccept<IsSameTag<Tag, ModuleDefinitionFileTag>::Result>::Do(this->Data,
+                                                                    sf);
       if(this->IsObjLib)
         {
         this->BadObjLibFiles.push_back(sf);
@@ -187,7 +183,7 @@ struct TagVisitor
       }
     else if(ext == "idl")
       {
-      doAccept<IsSameTag<Tag, IDLSourcesTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, IDLSourcesTag>::Result>::Do(this->Data, sf);
       if(this->IsObjLib)
         {
         this->BadObjLibFiles.push_back(sf);
@@ -195,19 +191,19 @@ struct TagVisitor
       }
     else if(ext == "resx")
       {
-      doAccept<IsSameTag<Tag, ResxTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, ResxTag>::Result>::Do(this->Data, sf);
       }
     else if(this->Header.find(sf->GetFullPath().c_str()))
       {
-      doAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>::Do(this->Data, sf);
       }
     else if(this->GlobalGenerator->IgnoreFile(sf->GetExtension().c_str()))
       {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
       }
     else
       {
-      doAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>(this->Data, sf);
+      DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
       if(this->IsObjLib && ext != "txt")
         {
         this->BadObjLibFiles.push_back(sf);
