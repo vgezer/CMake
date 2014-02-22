@@ -2977,7 +2977,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
         if(openstack.size() > 1 &&
            !(isalnum(inc) || inc == '/' ||
              inc == '_' || inc == '.' ||
-             inc == '+' || inc == '-'))
+             inc == '+' || inc == '-' ||
+             inc == '(' || inc == ')'))
           {
           errorstr += "Invalid character (\'";
           errorstr += inc;
