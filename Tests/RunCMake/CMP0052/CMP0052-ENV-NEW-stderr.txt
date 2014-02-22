@@ -1,0 +1,12 @@
+CMake Error at CMP0052-ENV-NEW.cmake:4 \(message\):
+  Syntax error in cmake code at
+
+    .*/Tests/RunCMake/CMP0052/CMP0052-ENV-NEW.cmake:4
+
+  when parsing string
+
+    -->\$ENV{e\(x\)}<--
+
+  Invalid character \('\('\) in a variable name:
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

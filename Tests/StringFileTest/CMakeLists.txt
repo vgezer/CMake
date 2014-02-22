@@ -143,8 +143,9 @@ endif()
 
 # Obscure environment variable name
 set("ENV{x+(y)}" "Obscure environment variable value")
-message("Output: [$ENV{x+(y)}]")
-if(NOT "$ENV{x+(y)}" STREQUAL "Obscure environment variable value")
+set(envvarname "x+(y)")
+message("Output: [$ENV{${envvarname}}]")
+if(NOT "$ENV{${envvarname}}" STREQUAL "Obscure environment variable value")
   message(SEND_ERROR "Environment variable \"ENV{x+(y)}\" does not work.")
 endif()
 

@@ -1,0 +1,9 @@
+CMake Warning \(dev\) at CMP0052-ENV-WARN.cmake:2 \(message\):
+  Policy CMP0052 is not set: Use the new variable expansion rules.  Run
+  "cmake --help-policy CMP0052" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-->value<--
