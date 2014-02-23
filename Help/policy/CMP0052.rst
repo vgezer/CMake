@@ -8,11 +8,11 @@ which offered some behavior no longer allowed by the new parser. Specifically,
 '@' expansion is no longer performed in files not configured using
 :command:`configure_file` or the CONFIGURE signature of :command:`string` and
 literal variable names are restricted to alphanumerics and the characters
-"./-+". If variables with other characters are required, use
+"./-+()". If variables with other characters are required, use
 
 .. code-block:: cmake
 
-  set(varname "parens()")
+  set(varname "disallowschars&")
   message("${${varname}}")
 
 The OLD behavior for this policy is to use the old variable expansion parser.
