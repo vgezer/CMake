@@ -2,7 +2,7 @@
 # FindHg
 # ------
 #
-#
+# Extract information from a mercurial working copy.
 #
 # The module defines the following variables:
 #
@@ -33,6 +33,7 @@
 #    find_package(Hg)
 #    if(HG_FOUND)
 #      message("hg found: ${HG_EXECUTABLE}")
+#      HG_WC_INFO(${PROJECT_SOURCE_DIR} Project)
 #      message("Current revision is ${Project_WC_REVISION}")
 #      message("Current changeset is ${Project_WC_CHANGESET}")
 #    endif()
