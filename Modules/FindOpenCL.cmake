@@ -28,37 +28,37 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FUNCTION(_FIND_OPENCL_VERSION)
-  INCLUDE(CheckSymbolExists)
-  INCLUDE(CMakePushCheckState)
+function(_FIND_OPENCL_VERSION)
+  include(CheckSymbolExists)
+  include(CMakePushCheckState)
 
   CMAKE_PUSH_CHECK_STATE()
-  FOREACH(VERSION "2_0" "1_2" "1_1" "1_0")
-    SET(CMAKE_REQUIRED_INCLUDES "${OpenCL_INCLUDE_DIR}")
+  foreach(VERSION "2_0" "1_2" "1_1" "1_0")
+    set(CMAKE_REQUIRED_INCLUDES "${OpenCL_INCLUDE_DIR}")
 
-    IF(APPLE)
+    if(APPLE)
       CHECK_SYMBOL_EXISTS(
         CL_VERSION_${VERSION}
         "${OpenCL_INCLUDE_DIR}/OpenCL/cl.h"
         OPENCL_VERSION_${VERSION})
-    ELSE()
+    else()
       CHECK_SYMBOL_EXISTS(
         CL_VERSION_${VERSION}
         "${OpenCL_INCLUDE_DIR}/CL/cl.h"
         OPENCL_VERSION_${VERSION})
-    ENDIF()
+    endif()
 
-    IF(OPENCL_VERSION_${VERSION})
-      STRING(REPLACE "_" "." VERSION "${VERSION}")
-      SET(OpenCL_VERSION_STRING ${VERSION} CACHE
+    if(OPENCL_VERSION_${VERSION})
+      string(REPLACE "_" "." VERSION "${VERSION}")
+      set(OpenCL_VERSION_STRING ${VERSION} CACHE
         STRING "Highest supported OpenCL version")
-      BREAK()
-    ENDIF()
-  ENDFOREACH()
+      break()
+    endif()
+  endforeach()
   CMAKE_POP_CHECK_STATE()
-ENDFUNCTION()
+endfunction()
 
-FIND_PATH(OpenCL_INCLUDE_DIR
+find_path(OpenCL_INCLUDE_DIR
   NAMES
     CL/cl.h OpenCL/cl.h
   PATHS ENV
@@ -74,9 +74,9 @@ FIND_PATH(OpenCL_INCLUDE_DIR
 
 _FIND_OPENCL_VERSION()
 
-IF(WIN32)
-  IF(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    FIND_LIBRARY(OpenCL_LIBRARY
+if(WIN32)
+  if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    find_library(OpenCL_LIBRARY
       NAMES OpenCL
       PATHS ENV
         "PROGRAMFILES(X86)"
@@ -90,8 +90,8 @@ IF(WIN32)
         lib/x86
         lib/Win32
         OpenCL/common/lib/Win32)
-  ELSEIF(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    FIND_LIBRARY(OpenCL_LIBRARY
+  elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    find_library(OpenCL_LIBRARY
       NAMES OpenCL
       PATHS ENV
         "PROGRAMFILES(X86)"
@@ -105,22 +105,22 @@ IF(WIN32)
         lib/x86_64
         lib/x64
         OpenCL/common/lib/x64)
-  ENDIF()
-ELSE()
-  FIND_LIBRARY(OpenCL_LIBRARY
+  endif()
+else()
+  find_library(OpenCL_LIBRARY
     NAMES OpenCL)
-ENDIF()
+endif()
 
-SET(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
+set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(
   OpenCL
   FOUND_VAR OpenCL_FOUND
   REQUIRED_VARS OpenCL_LIBRARY OpenCL_INCLUDE_DIR
   VERSION_VAR OpenCL_VERSION_STRING)
 
-MARK_AS_ADVANCED(
+mark_as_advanced(
   OpenCL_INCLUDE_DIR
   OpenCL_LIBRARY
   OpenCL_LIBRARIES
