@@ -17,12 +17,10 @@ list(APPEND my_targets mylibA)
 
 add_library(mylibB STATIC mylibB.c)
 set_target_properties(mylibB PROPERTIES
-    PDB_NAME "mylibB_Special"
-    PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mylibB_PDB"
+    COMPILE_PDB_NAME "mylibB_Special"
+    COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/mylibB_PDB"
 )
-# TODO: The only .pdb available for a static library is that generated
-# by the compiler /Fd option which is not the same as the linker /pdb.
-# list(APPEND my_targets mylibB)
+list(APPEND my_targets mylibB)
 
 add_library(mylibC SHARED mylibC.c)
 set_target_properties(mylibC PROPERTIES
@@ -32,10 +30,9 @@ list(APPEND my_targets mylibC)
 
 add_library(mylibD STATIC mylibD.c)
 set_target_properties(mylibD PROPERTIES
-    PDB_NAME "mylibD_Special"
+    COMPILE_PDB_NAME "mylibD_Special"
 )
-# TODO: See comment for mylibB.
-# list(APPEND my_targets mylibD)
+list(APPEND my_targets mylibD)
 
 add_executable(myexe myexe.c)
 set_target_properties(myexe PROPERTIES
@@ -66,6 +63,12 @@ set(pdbs "")
 foreach(t ${my_targets})
   get_property(pdb_name TARGET ${t} PROPERTY PDB_NAME)
   get_property(pdb_dir TARGET ${t} PROPERTY PDB_OUTPUT_DIRECTORY)
+  if(NOT pdb_name)
+    get_property(pdb_name TARGET ${t} PROPERTY COMPILE_PDB_NAME)
+  endif()
+  if(NOT pdb_dir)
+    get_property(pdb_dir TARGET ${t} PROPERTY COMPILE_PDB_OUTPUT_DIRECTORY)
+  endif()
   if(NOT pdb_dir)
     set(pdb_dir ${CMAKE_CURRENT_BINARY_DIR})
   endif()
