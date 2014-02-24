@@ -320,7 +320,6 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       mf->GetDefinition("MSVC_CXX_ARCHITECTURE_ID"))
     {
     std::string pdbPath;
-    std::string compilePdbPath;
     if(this->Target->GetType() == cmTarget::EXECUTABLE ||
        this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
        this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -330,25 +329,11 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       pdbPath += "/";
       pdbPath += this->Target->GetPDBName(this->GetConfigName());
       }
-    if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
-      {
-      compilePdbPath = this->Target->GetCompilePDBPath(this->GetConfigName());
-      if(compilePdbPath.empty())
-        {
-        compilePdbPath = this->Target->GetSupportDirectory() + "/";
-        }
-      }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                           ConvertToNinjaPath(pdbPath.c_str()).c_str(),
                           cmLocalGenerator::SHELL);
-    vars["TARGET_COMPILE_PDB"] =
-      this->GetLocalGenerator()->ConvertToOutputFormat(
-        ConvertToNinjaPath(compilePdbPath.c_str()).c_str(),
-        cmLocalGenerator::SHELL);
-
     EnsureParentDirectoryExists(pdbPath);
-    EnsureParentDirectoryExists(compilePdbPath);
     return true;
     }
   return false;
@@ -377,7 +362,6 @@ cmNinjaTargetGenerator
   vars.Object = "$out";
   vars.Defines = "$DEFINES";
   vars.TargetPDB = "$TARGET_PDB";
-  vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
 
   cmMakefile* mf = this->GetMakefile();
