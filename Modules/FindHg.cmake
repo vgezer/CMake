@@ -1,23 +1,22 @@
 #.rst:
-# FindHG
+# FindHg
 # ------
 #
-# Extract information from a mercurial working copy
+# Extract information from a mercurial working copy.
 #
 # The module defines the following variables:
 #
 # ::
 #
-#   Hg_EXECUTABLE - path to mercurial command line client
-#   Hg_FOUND - true if the command line client was found
-#   Hg_VERSION_STRING - the version of the mercurial client
-#
+#    HG_EXECUTABLE - path to mercurial command line client (hg)
+#    HG_FOUND - true if the command line client was found
+#    HG_VERSION_STRING - the version of mercurial found
 #
 # If the command line client executable is found the following macro is defined:
 #
 # ::
 #
-#   Hg_WC_INFO(<dir> <var-prefix>)
+#   HG_WC_INFO(<dir> <var-prefix>)
 #
 # Hg_WC_INFO extracts information of a mercurial working copy
 # at a given location.  This macro defines the following variables:
@@ -31,16 +30,18 @@
 #
 # ::
 #
-#   find_package(Hg)
-#   if(Hg_FOUND)
-#     Hg_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-#     message("Current revision is ${Project_WC_REVISION}")
-#     message("Current changeset is ${Project_WC_CHANGESET}")
-#   endif()
-#
+#    find_package(Hg)
+#    if(HG_FOUND)
+#      message("hg found: ${HG_EXECUTABLE}")
+#      HG_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+#      message("Current revision is ${Project_WC_REVISION}")
+#      message("Current changeset is ${Project_WC_CHANGESET}")
+#    endif()
 
 #=============================================================================
-# Copyright 2014 Matthaeus G. Chajdas
+# Copyright 2010-2012 Kitware, Inc.
+# Copyright 2012      Rolf Eike Beer <eike@sf-mail.de>
+# Copyright 2014 	  Matthaeus G. Chajdas
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -52,40 +53,45 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-FIND_PROGRAM(Hg_EXECUTABLE
+find_program(HG_EXECUTABLE
   NAMES hg
-  PATHS [HKEY_LOCAL_MACHINE\\Software\\TortoiseHG]
-      [HKEY_LOCAL_MACHINE\\Software\\Wow6432Node\\TortoiseHG]
-  DOC "hg command line client")
-MARK_AS_ADVANCED(Hg_EXECUTABLE)
+  PATHS
+    [HKEY_LOCAL_MACHINE\\Software\\TortoiseHG]
+    [HKEY_LOCAL_MACHINE\\Software\\Wow6432Node\\TortoiseHG]
+  PATH_SUFFIXES Mercurial
+  DOC "hg command line client"
+  )
+mark_as_advanced(HG_EXECUTABLE)
 
-IF(Hg_EXECUTABLE)
-  EXECUTE_PROCESS(COMMAND ${Hg_EXECUTABLE} --version
-    OUTPUT_VARIABLE Hg_VERSION
-    ERROR_QUIET
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
-  IF(Hg_VERSION MATCHES "^Mercurial Distributed SCM \\(version ([0-9][^)]*)\\)")
-    SET(Hg_VERSION_STRING "${CMAKE_MATCH_1}")
-  ENDIF()
-  UNSET(Hg_VERSION)
+if(HG_EXECUTABLE)
+  execute_process(COMMAND ${HG_EXECUTABLE} --version
+                  OUTPUT_VARIABLE hg_version
+                  ERROR_QUIET
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(hg_version MATCHES "^Mercurial Distributed SCM \\(version ([0-9][^)]*)\\)")
+    set(HG_VERSION_STRING "${CMAKE_MATCH_1}")
+  endif()
+  unset(hg_version)
 
-  MACRO(Hg_WC_INFO dir prefix)
-    EXECUTE_PROCESS(COMMAND ${Hg_EXECUTABLE} id -i -n
+  macro(HG_WC_INFO dir prefix)
+    execute_process(COMMAND ${HG_EXECUTABLE} id -i -n
       WORKING_DIRECTORY ${dir}
-      ERROR_VARIABLE Hg_ERROR
+      RESULT_VARIABLE hg_id_result
+      ERROR_VARIABLE hg_id_error
       OUTPUT_VARIABLE ${prefix}_WC_DATA
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-    IF(NOT ${Hg_error} EQUAL 0)
-      MESSAGE(SEND_ERROR "Command \"${Hg_EXECUTBALE} id -n\" in directory ${dir} failed with output:\n${Hg_ERROR}")
-    ENDIF()
+    if(NOT ${hg_id_result} EQUAL 0)
+      message(SEND_ERROR "Command \"${HG_EXECUTBALE} id -n\" in directory ${dir} failed with output:\n${hg_id_error}")
+    endif()
 
-    STRING(REGEX REPLACE "([0-9a-f]+)\\+? [0-9]+\\+?" "\\1" ${prefix}_WC_CHANGESET ${${prefix}_WC_DATA})
-    STRING(REGEX REPLACE "[0-9a-f]+\\+? ([0-9]+)\\+?" "\\1" ${prefix}_WC_REVISION ${${prefix}_WC_DATA})
-  ENDMACRO(Hg_WC_INFO)
-ENDIF(Hg_EXECUTABLE)
+    string(REGEX REPLACE "([0-9a-f]+)\\+? [0-9]+\\+?" "\\1" ${prefix}_WC_CHANGESET ${${prefix}_WC_DATA})
+    string(REGEX REPLACE "[0-9a-f]+\\+? ([0-9]+)\\+?" "\\1" ${prefix}_WC_REVISION ${${prefix}_WC_DATA})
+  endmacro(HG_WC_INFO)
+endif()
 
-INCLUDE(FindPackageHandleStandardArgs)
+# Handle the QUIETLY and REQUIRED arguments and set HG_FOUND to TRUE if
+# all listed variables are TRUE
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(Hg
-  FOUND_VAR Hg_FOUND
-  REQUIRED_VARS Hg_EXECUTABLE
-  VERSION_VAR Hg_VERSION_STRING)
+                                  REQUIRED_VARS HG_EXECUTABLE
+                                  VERSION_VAR HG_VERSION_STRING)
