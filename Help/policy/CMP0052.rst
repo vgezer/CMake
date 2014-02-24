@@ -15,6 +15,8 @@ literal variable names are restricted to alphanumerics and the characters
   set(varname "disallowschars&")
   message("${${varname}}")
 
+This policy also enforces :policy:`CMP0010` unconditionally.
+
 The OLD behavior for this policy is to use the old variable expansion parser.
 The NEW behavior is to use the new variable expansion rules.
 
