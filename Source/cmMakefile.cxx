@@ -2975,8 +2975,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
       default:
         {
         if(openstack.size() > 1 &&
-           !(isalnum(inc) || inc == '/' ||
-             inc == '_' || inc == '.' ||
+           !(isalnum(inc) || inc == '_' ||
+             inc == '/' || inc == '.' ||
              inc == '+' || inc == '-' ||
              inc == '(' || inc == ')'))
           {
