@@ -321,11 +321,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       }
     }
 
-  std::string compilePdbOutputPath =
-    this->Target->GetCompilePDBDirectory(this->ConfigName);
-  cmSystemTools::MakeDirectory(compilePdbOutputPath.c_str());
-
-  std::string pdbOutputPath = this->Target->GetPDBDirectory(this->ConfigName);
+  std::string pdbOutputPath = this->Target->GetPDBDirectory();
   cmSystemTools::MakeDirectory(pdbOutputPath.c_str());
   pdbOutputPath += "/";
 
