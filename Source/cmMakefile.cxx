@@ -2963,7 +2963,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
               result = cmSystemTools::EscapeQuotes(result.c_str());
               }
             // Skip over the variable.
-            openstack.top().lookup.append(last, in);
+            openstack.top().lookup.append(last, in - last);
             openstack.top().lookup.append(result);
             in = nextAt;
             last = in + 1;
