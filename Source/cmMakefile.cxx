@@ -2975,8 +2975,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
       default:
         {
         if(openstack.size() > 1 &&
-           !(isalnum(inc) || inc == '/' ||
-             inc == '_' || inc == '.' ||
+           !(isalnum(inc) || inc == '_' ||
+             inc == '/' || inc == '.' ||
              inc == '+' || inc == '-' ||
              inc == '(' || inc == ')'))
           {
@@ -2995,26 +2995,11 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
   // Check for open variable references yet.
   if(!error && openstack.size() != 1)
     {
-    // There's an open variable reference waiting.  Use policy CMP0010 to
-    // decide whether it is an error.
-    switch(this->GetPolicyStatus(cmPolicies::CMP0010))
-      {
-      case cmPolicies::WARN:
-        errorstr += "\n" + this->GetPolicies()
-                       ->GetPolicyWarning(cmPolicies::CMP0010);
-      case cmPolicies::OLD:
-        // OLD behavior is to just warn and continue.
-        mtype = cmake::AUTHOR_WARNING;
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        errorstr += "\n" + this->GetPolicies()
-                       ->GetRequiredPolicyError(cmPolicies::CMP0010);
-      case cmPolicies::NEW:
-        // NEW behavior is to report the error.
-        mtype = cmake::FATAL_ERROR;
-        break;
-      }
+    // There's an open variable reference waiting.  Policy CMP0010 flags
+    // whether this is an error or not.  The new parser now enforces
+    // CMP0010 as well.
+    errorstr += "\nThere is an unterminated variable reference.";
+    mtype = cmake::FATAL_ERROR;
     error = true;
     }
 
