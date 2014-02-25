@@ -2542,6 +2542,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   bool compareResults = false;
   cmake::MessageType mtype = cmake::LOG;
   std::string errorstr;
+  std::string original;
 
   // Sanity check the @ONLY mode.
   if(atOnly && (!noEscapes || !removeEmpty))
@@ -2556,13 +2557,15 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
 
   // Variables used in the WARN case.
   std::string newResult;
+  std::string newErrorstr;
   cmake::MessageType newError = cmake::LOG;
 
   switch(this->GetPolicyStatus(cmPolicies::CMP0052))
     {
     case cmPolicies::WARN:
       {
-      std::string newErrorstr;
+      // Save the original string for the warning.
+      original = source;
       newResult = source;
       compareResults = true;
       newError =
@@ -2585,6 +2588,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       break;
     }
 
+  // If it's an error in either case, just report the error...
   if(mtype != cmake::LOG)
     {
     if(mtype == cmake::FATAL_ERROR)
@@ -2593,10 +2597,24 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       }
     this->IssueMessage(mtype, errorstr);
     }
+  // ...otherwise, see if there's a difference that needs to be warned about.
   else if(compareResults && (newResult != source || newError != mtype))
     {
-    this->IssueMessage(cmake::AUTHOR_WARNING,
-        this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0052));
+    std::string message =
+      this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0052);
+    message += "\n  Input: \'" + original + "\'";
+    if(newError != mtype)
+      {
+      message += "\n  Old behavior is accepted and "
+                 "the new behavior causes an error: "
+                 "\'" + newErrorstr + "\'";
+      }
+    else
+      {
+      message += "\n  Old expansion: \'" + source + "\'";
+      message += "\n  New expansion: \'" + newResult + "\'";
+      }
+    this->IssueMessage(cmake::AUTHOR_WARNING, message);
     }
 
   return source.c_str();
