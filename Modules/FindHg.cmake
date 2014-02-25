@@ -41,7 +41,7 @@
 #=============================================================================
 # Copyright 2010-2012 Kitware, Inc.
 # Copyright 2012      Rolf Eike Beer <eike@sf-mail.de>
-# Copyright 2014 	  Matthaeus G. Chajdas
+# Copyright 2014      Matthaeus G. Chajdas
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
