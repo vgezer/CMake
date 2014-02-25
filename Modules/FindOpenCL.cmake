@@ -8,11 +8,19 @@
 #
 # ::
 #
-#   OpenCL_FOUND          - system has OpenCL
-#   OpenCL_INCLUDE_DIR    - the OpenCL include directory
-#   OpenCL_LIBRARIES      - Link against this library to use OpenCL
-#   OpenCL_LIBRARY        - Path to the OpenCL library
+#   OpenCL_FOUND          - True if OpenCL was found
+#   OpenCL_INCLUDE_DIRS   - include directories for OpenCL
+#   OpenCL_LIBRARIES      - link against this library to use OpenCL
 #   OpenCL_VERSION_STRING - Highest supported OpenCL version (eg. 1.2)
+#   OpenCL_VERSION_MAJOR  - The major version of the OpenCL implementation
+#   OpenCL_VERSION_MINOR  - The minor version of the OpenCL implementation
+#
+# The module will also define two cache variables
+#
+# ::
+#
+#   OpenCL_INCLUDE_DIR    - the OpenCL include directory
+#   OpenCL_LIBRARY        - the path to the OpenCL library
 #
 
 #=============================================================================
@@ -50,8 +58,12 @@ function(_FIND_OPENCL_VERSION)
 
     if(OPENCL_VERSION_${VERSION})
       string(REPLACE "_" "." VERSION "${VERSION}")
-      set(OpenCL_VERSION_STRING ${VERSION} CACHE
-        STRING "Highest supported OpenCL version")
+      set(OpenCL_VERSION_STRING ${VERSION} PARENT_SCOPE)
+      string(REGEX MATCHALL "[0-9]+" version_components "${VERSION}")
+      list(GET version_components 0 major_version)
+      list(GET version_components 1 minor_version)
+      set(OpenCL_VERSION_MAJOR ${major_version} PARENT_SCOPE)
+      set(OpenCL_VERSION_MINOR ${minor_version} PARENT_SCOPE)
       break()
     endif()
   endforeach()
@@ -112,6 +124,7 @@ else()
 endif()
 
 set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
+set(OpenCL_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(
@@ -122,6 +135,4 @@ find_package_handle_standard_args(
 
 mark_as_advanced(
   OpenCL_INCLUDE_DIR
-  OpenCL_LIBRARY
-  OpenCL_LIBRARIES
-  OpenCL_VERSION_STRING)
+  OpenCL_LIBRARY)
