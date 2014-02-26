@@ -4,9 +4,7 @@
 #
 # Try to find OpenCL
 #
-# Once done this will define
-#
-# ::
+# Once done this will define::
 #
 #   OpenCL_FOUND          - True if OpenCL was found
 #   OpenCL_INCLUDE_DIRS   - include directories for OpenCL
@@ -15,9 +13,7 @@
 #   OpenCL_VERSION_MAJOR  - The major version of the OpenCL implementation
 #   OpenCL_VERSION_MINOR  - The minor version of the OpenCL implementation
 #
-# The module will also define two cache variables
-#
-# ::
+# The module will also define two cache variables::
 #
 #   OpenCL_INCLUDE_DIR    - the OpenCL include directory
 #   OpenCL_LIBRARY        - the path to the OpenCL library
