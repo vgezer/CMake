@@ -871,6 +871,12 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 {
   std::string gcovCommand
     = this->CTest->GetCTestConfiguration("CoverageCommand");
+  if (gcovCommand.size() == 0)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+      "Could not find gcov." << std::endl);
+    return 0;
+    }
   std::string gcovExtraFlags
     = this->CTest->GetCTestConfiguration("CoverageExtraFlags");
 
