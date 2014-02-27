@@ -2996,7 +2996,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
            !(isalnum(inc) || inc == '_' ||
              inc == '/' || inc == '.' ||
              inc == '+' || inc == '-' ||
-             inc == '(' || inc == ')'))
+             (openstack.top().domain == ENVIRONMENT && (
+              inc == '(' || inc == ')'))))
           {
           errorstr += "Invalid character (\'";
           errorstr += inc;
