@@ -2996,7 +2996,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
            !(isalnum(inc) || inc == '_' ||
              inc == '/' || inc == '.' ||
              inc == '+' || inc == '-' ||
-             inc == '(' || inc == ')'))
+             (openstack.top().domain == ENVIRONMENT && (
+              inc == '(' || inc == ')'))))
           {
           errorstr += "Invalid character (\'";
           errorstr += inc;
@@ -3016,7 +3017,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
     // There's an open variable reference waiting.  Policy CMP0010 flags
     // whether this is an error or not.  The new parser now enforces
     // CMP0010 as well.
-    errorstr += "\nThere is an unterminated variable reference.";
+    errorstr += "There is an unterminated variable reference.";
     mtype = cmake::FATAL_ERROR;
     error = true;
     }
